@@ -4,12 +4,15 @@ import { BallTypeView } from '../Components/BallTypeView'
 import { Bodies, Composite } from 'matter-js'
 import { GameManager } from '../Managers/GameManager'
 import Matter from 'matter-js'
+import { GameController } from '../Components/GameController'
 
 export class GameScene extends Container {
     private gameManager: GameManager
     private app: Application
     private engine: Matter.Engine
     private gameplayPod: GameplayPod
+
+    private gameController: GameController
 
     constructor(app: Application, engine: Matter.Engine) {
         super()
@@ -22,6 +25,7 @@ export class GameScene extends Container {
         this.gameplayPod = this.gameManager.gameplayPod
 
         Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollision(event))
+        app.stage.hitArea = app.screen
     }
 
     public async doInit() {
@@ -69,6 +73,11 @@ export class GameScene extends Container {
         )
 
         Composite.add(this.engine.world, [ground, leftWall, rightWall])
+
+        this.gameController = new GameController()
+
+        this.gameController.position.set(floorGraphic.getBounds().x, 0)
+        this.gameController.doInit(floorGraphic.width, floorGraphic.getBounds().y)
 
         const ball1 = new BallTypeView()
         ball1.position.set(this.app.screen.width / 2, 50)

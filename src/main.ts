@@ -1,5 +1,5 @@
 import { GameScene } from './scripts/Scenes/GameScene'
-import { Application } from 'pixi.js'
+import { Application, Graphics } from 'pixi.js'
 import { Bodies, Composite, Engine, Render, Runner } from 'matter-js'
 
 const bootstrap = async () => {
@@ -31,8 +31,9 @@ const bootstrap = async () => {
 
     render.canvas.id = 'canvas2'
     render.canvas.style.position = 'absolute'
+    render.canvas.style.pointerEvents = 'none'
 
-    Render.run(render)
+    //Render.run(render)
 
     const runner = Runner.create()
     Runner.run(runner, engine)
