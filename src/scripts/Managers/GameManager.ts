@@ -8,6 +8,7 @@ export class GameManager {
     public app: Application
     public gameplayPod: GameplayPod
     public engine: Matter.Engine
+    public currentStaticBall: BallTypeView
     public elements: BallTypeView[] = []
 
     private static getInstance() {
@@ -22,12 +23,11 @@ export class GameManager {
         return this.getInstance()
     }
 
-    doInit(app: Application, engine: Matter.Engine): void {
+    public doInit(app: Application, engine: Matter.Engine) {
         this.app = app
         this.engine = engine
 
         this.gameplayPod = new GameplayPod()
-        this.gameplayPod.loadData()
     }
 
     findSpriteWithRigidbody(rb: Matter.Body): BallTypeView {

@@ -24,7 +24,9 @@ export class GameScene extends Container {
         Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollision(event))
     }
 
-    public doInit() {
+    public async doInit() {
+        await this.gameplayPod.loadData()
+
         const floorGraphic = new Graphics()
         floorGraphic
             .rect(this.app.screen.width / 2, this.app.screen.height - 20, 350, 20)
@@ -69,24 +71,24 @@ export class GameScene extends Container {
         Composite.add(this.engine.world, [ground, leftWall, rightWall])
 
         const ball1 = new BallTypeView()
-        ball1.position.set(this.app.screen.width / 2 - 100, 50)
-        ball1.doInit(20)
+        ball1.position.set(this.app.screen.width / 2, 50)
+        ball1.doInit(this.gameManager.gameplayPod.ballBeans[0])
         this.gameManager.elements.push(ball1)
 
-        const ball2 = new BallTypeView()
-        ball2.position.set(this.app.screen.width / 2 - 120, 300)
-        ball2.doInit(20)
-        this.gameManager.elements.push(ball2)
+        // const ball2 = new BallTypeView()
+        // ball2.position.set(this.app.screen.width / 2 - 120, 300)
+        // ball2.doInit(20)
+        // this.gameManager.elements.push(ball2)
 
-        const ball3 = new BallTypeView()
-        ball3.position.set(this.app.screen.width / 2 + 100, 50)
-        ball3.doInit(20)
-        this.gameManager.elements.push(ball3)
+        // const ball3 = new BallTypeView()
+        // ball3.position.set(this.app.screen.width / 2 + 100, 50)
+        // ball3.doInit(20)
+        // this.gameManager.elements.push(ball3)
 
-        const ball4 = new BallTypeView()
-        ball4.position.set(this.app.screen.width / 2 + 120, 300)
-        ball4.doInit(20)
-        this.gameManager.elements.push(ball4)
+        // const ball4 = new BallTypeView()
+        // ball4.position.set(this.app.screen.width / 2 + 120, 300)
+        // ball4.doInit(20)
+        // this.gameManager.elements.push(ball4)
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
@@ -104,7 +106,7 @@ export class GameScene extends Container {
     }
 
     removeElement(element: BallTypeView) {
-        //  element.beforeUnload()
+        element.onDestroy()
         Matter.Composite.remove(this.engine.world, element.getBody())
         this.app.stage.removeChild(element)
         this.gameManager.elements = this.gameManager.elements.filter((el: BallTypeView) => el != element)

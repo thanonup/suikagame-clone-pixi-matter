@@ -3,24 +3,28 @@
         "name": "Pink",
         "ballType": "Pink",
         "score": 10,
+        "size": 10,
         "colorCode": "#FF69B4"
     },
     {
         "name": "Red",
         "ballType": "Red",
         "score": 15,
+        "size": 20,
         "colorCode": "#CD5C5C"
     },
     {
         "name": "Purple",
         "ballType": "Purple",
         "score": 20,
+        "size": 30,
         "colorCode": "#BA55D3"
     },
     {
         "name": "Orange",
         "ballType": "Orange",
         "score": 25,
+        "size": 40,
         "colorCode": "#FFA07A"
     }
 ]

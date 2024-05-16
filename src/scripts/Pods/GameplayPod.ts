@@ -8,6 +8,7 @@ export class GameplayPod {
         const data = await Assets.load<BallBean[]>('/assets/ball-data.json')
         this.ballBeans = data
 
+        console.log('------Data Ball-------')
         console.log(this.ballBeans)
     }
 }
