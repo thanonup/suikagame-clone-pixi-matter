@@ -3,6 +3,7 @@ import { GameplayPod } from '../Pods/GameplayPod'
 import { BallTypeView } from '../Components/BallTypeView'
 import { Bodies, Composite } from 'matter-js'
 import { GameManager } from '../Managers/GameManager'
+import Matter from 'matter-js'
 
 export class GameScene extends Container {
     private gameManager: GameManager
@@ -19,6 +20,8 @@ export class GameScene extends Container {
         this.app = this.gameManager.app
         this.engine = this.gameManager.engine
         this.gameplayPod = this.gameManager.gameplayPod
+
+        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollision(event))
     }
 
     public doInit() {
@@ -66,19 +69,50 @@ export class GameScene extends Container {
         Composite.add(this.engine.world, [ground, leftWall, rightWall])
 
         const ball1 = new BallTypeView()
-        ball1.doInit(this.app.screen.width / 2 + 10, 50, 20)
+        ball1.position.set(this.app.screen.width / 2 - 100, 50)
+        ball1.doInit(20)
         this.gameManager.elements.push(ball1)
 
         const ball2 = new BallTypeView()
-        ball2.doInit(this.app.screen.width / 2, 300, 20)
+        ball2.position.set(this.app.screen.width / 2 - 120, 300)
+        ball2.doInit(20)
         this.gameManager.elements.push(ball2)
+
+        const ball3 = new BallTypeView()
+        ball3.position.set(this.app.screen.width / 2 + 100, 50)
+        ball3.doInit(20)
+        this.gameManager.elements.push(ball3)
+
+        const ball4 = new BallTypeView()
+        ball4.position.set(this.app.screen.width / 2 + 120, 300)
+        ball4.doInit(20)
+        this.gameManager.elements.push(ball4)
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
     }
 
+    private onCollision(event: Matter.IEventCollision<Matter.Engine>) {
+        event.pairs.forEach((collision) => {
+            let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
+
+            if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
+                const element = this.gameManager.findSpriteWithRigidbody(bodyA)
+                if (element) this.removeElement(element)
+            }
+        })
+    }
+
+    removeElement(element: BallTypeView) {
+        //  element.beforeUnload()
+        Matter.Composite.remove(this.engine.world, element.getBody())
+        this.app.stage.removeChild(element)
+        this.gameManager.elements = this.gameManager.elements.filter((el: BallTypeView) => el != element)
+        console.log(`Removed id ${element.getBody().id}. Elements left: ${this.gameManager.elements.length}`)
+    }
+
     public update() {
-        console.log('update')
+        //  console.log('update')
 
         this.gameManager.elements.forEach((x) => x.update())
     }

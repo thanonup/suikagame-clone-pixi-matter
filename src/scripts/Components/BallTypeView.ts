@@ -28,11 +28,9 @@ export class BallTypeView extends Container {
         GameObjectConstructor(this.app, this)
     }
 
-    public doInit(xPos: number, yPos: number, size: number) {
+    public doInit(size: number) {
         this.initSize = size
-        this.initYPos = yPos
-        this.x = xPos
-        this.y = yPos
+
         this.circle = new Graphics()
         this.circle.circle(0, 0, size).fill(0x705537)
 
@@ -45,7 +43,7 @@ export class BallTypeView extends Container {
             {
                 label: 'Ball',
                 restitution: 0.3,
-                // isStatic: true,
+                //isStatic: true,
             }
         )
 
@@ -55,5 +53,9 @@ export class BallTypeView extends Container {
     public update() {
         this.position.set(this.rigidBody.position.x, this.rigidBody.position.y)
         this.rotation = this.rigidBody.angle
+    }
+
+    public getBody(): Matter.Body {
+        return this.rigidBody
     }
 }

@@ -1,5 +1,6 @@
 import { Application } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
+import { BallTypeView } from '../Components/BallTypeView'
 
 export class GameManager {
     private static _instance: GameManager
@@ -7,7 +8,7 @@ export class GameManager {
     public app: Application
     public gameplayPod: GameplayPod
     public engine: Matter.Engine
-    public elements = []
+    public elements: BallTypeView[] = []
 
     private static getInstance() {
         if (!GameManager._instance) {
@@ -27,5 +28,9 @@ export class GameManager {
 
         this.gameplayPod = new GameplayPod()
         this.gameplayPod.loadData()
+    }
+
+    findSpriteWithRigidbody(rb: Matter.Body): BallTypeView {
+        return this.elements.find((element) => element.getBody() === rb)
     }
 }
