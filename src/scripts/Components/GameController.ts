@@ -1,13 +1,17 @@
 import { Application, Graphics } from 'pixi.js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
+import { BallStateType } from '../Types/BallStateType'
 
 export class GameController extends Graphics {
-    app: Application
+    private app: Application
+
+    private gameManager: GameManager
     constructor() {
         super()
 
-        this.app = GameManager.instance.app
+        this.gameManager = GameManager.instance
+        this.app = this.gameManager.app
         GameObjectConstructor(this.app, this)
     }
 
@@ -16,8 +20,27 @@ export class GameController extends Graphics {
 
         this.eventMode = 'static'
         this.cursor = 'pointer'
-        this.on('pointerdown', () => {
-            console.log('Click Area')
+        this.on('pointerdown', (event) => {
+            const currentStaticBall = this.gameManager.currentStaticBall
+            if (currentStaticBall) {
+                currentStaticBall.getPod().changeBallState(BallStateType.Idle)
+
+                currentStaticBall.movePosition(event.x)
+
+                const postionX = currentStaticBall.getBody().position.x
+
+                if (postionX + currentStaticBall.width / 2 > this.x + this.width) {
+                    currentStaticBall.movePosition(this.width + this.x - currentStaticBall.width / 2)
+                }
+
+                if (postionX - currentStaticBall.width / 2 < this.x) {
+                    currentStaticBall.movePosition(this.x + currentStaticBall.width / 2)
+                }
+
+                this.gameManager.currentStaticBall = undefined
+            } else {
+                console.log('noting ball')
+            }
         })
     }
 }

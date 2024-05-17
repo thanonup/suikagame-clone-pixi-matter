@@ -75,13 +75,12 @@ export class GameScene extends Container {
         Composite.add(this.engine.world, [ground, leftWall, rightWall])
 
         this.gameController = new GameController()
-
-        this.gameController.position.set(floorGraphic.getBounds().x, 0)
         this.gameController.doInit(floorGraphic.width, floorGraphic.getBounds().y)
+        this.gameController.position.set(floorGraphic.getBounds().x, 0)
 
         const ball1 = new BallTypeView()
         ball1.position.set(this.app.screen.width / 2, 50)
-        ball1.doInit(this.gameManager.gameplayPod.ballBeans[0])
+        ball1.doInit(this.gameManager.gameplayPod.ballBeans[3])
         this.gameManager.elements.push(ball1)
 
         // const ball2 = new BallTypeView()

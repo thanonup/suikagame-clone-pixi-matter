@@ -6,7 +6,8 @@ import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { BallTypePod } from './Pod/BallTypePod'
 import { BallBean } from '../Beans/BallBean'
-import { Subscription } from 'rxjs'
+import { Subscription, timer } from 'rxjs'
+import Matter from 'matter-js'
 
 export class BallTypeView extends Container {
     private app: Application
@@ -46,8 +47,9 @@ export class BallTypeView extends Container {
             bean.size,
             {
                 label: 'Ball',
-                restitution: 0.3,
+                restitution: 0.2,
                 isStatic: true,
+                angle: 4.7,
             }
         )
 
@@ -59,7 +61,7 @@ export class BallTypeView extends Container {
                     this.gameManager.currentStaticBall = this
                     break
                 case BallStateType.Idle:
-                    this.rigidBody.isStatic = false
+                    Matter.Body.setStatic(this.rigidBody, false)
                     break
                 case BallStateType.Merge:
                     break
@@ -78,6 +80,10 @@ export class BallTypeView extends Container {
 
     public getPod(): BallTypePod {
         return this.pod
+    }
+
+    public movePosition(xPos: number) {
+        Matter.Body.setPosition(this.rigidBody, { x: xPos, y: this.rigidBody.position.y })
     }
 
     public onDestroy() {
