@@ -1,10 +1,9 @@
-import { Application } from 'pixi.js'
+import { Container } from 'pixi.js'
 
-export function GameObjectConstructor(app: Application, gameObject: any) {
-    app.stage.addChild(gameObject)
+export function GameObjectConstructor(scene: Container, gameObject: any) {
+    scene.addChild(gameObject)
 
-    //app.stage.addEventListener()
-    // scene.events.on("shutdown", () => {
-    //     gameObject.destroy(true);
-    // });
+    scene.on('removed', () => {
+        if (gameObject.onDestroy() != undefined) gameObject.onDestroy()
+    })
 }

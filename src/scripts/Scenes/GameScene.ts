@@ -5,6 +5,7 @@ import { Bodies, Composite } from 'matter-js'
 import { GameManager } from '../Managers/GameManager'
 import Matter from 'matter-js'
 import { GameController } from '../Components/GameController'
+import { Subscription, timer } from 'rxjs'
 
 export class GameScene extends Container {
     private gameManager: GameManager
@@ -12,15 +13,17 @@ export class GameScene extends Container {
     private engine: Matter.Engine
     private gameplayPod: GameplayPod
 
+    private disposeSpawner: Subscription
+    private disposeTimer: Subscription
     private gameController: GameController
 
     constructor(app: Application, engine: Matter.Engine) {
         super()
 
         this.gameManager = GameManager.instance
-        this.gameManager.doInit(app, engine)
+        this.gameManager.doInit(this, engine)
 
-        this.app = this.gameManager.app
+        this.app = app
         this.engine = this.gameManager.engine
         this.gameplayPod = this.gameManager.gameplayPod
 
@@ -78,28 +81,28 @@ export class GameScene extends Container {
         this.gameController.doInit(floorGraphic.width, floorGraphic.getBounds().y)
         this.gameController.position.set(floorGraphic.getBounds().x, 0)
 
-        const ball1 = new BallTypeView()
-        ball1.position.set(this.app.screen.width / 2, 50)
-        ball1.doInit(this.gameManager.gameplayPod.ballBeans[0])
-        this.gameManager.elements.push(ball1)
+        const ball = new BallTypeView()
+        ball.position.set(this.app.screen.width / 2, 50)
+        ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+        this.gameManager.elements.push(ball)
 
-        // const ball2 = new BallTypeView()
-        // ball2.position.set(this.app.screen.width / 2 - 120, 300)
-        // ball2.doInit(20)
-        // this.gameManager.elements.push(ball2)
-
-        // const ball3 = new BallTypeView()
-        // ball3.position.set(this.app.screen.width / 2 + 100, 50)
-        // ball3.doInit(20)
-        // this.gameManager.elements.push(ball3)
-
-        // const ball4 = new BallTypeView()
-        // ball4.position.set(this.app.screen.width / 2 + 120, 300)
-        // ball4.doInit(20)
-        // this.gameManager.elements.push(ball4)
+        this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
+            if (ball == undefined) {
+                this.disposeTimer = timer(1500).subscribe((_) => {
+                    const ball = new BallTypeView()
+                    ball.position.set(this.app.screen.width / 2, 50)
+                    ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+                    this.gameManager.elements.push(ball)
+                })
+            }
+        })
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
+
+        this.on('removed', () => {
+            this.onDestroy()
+        })
     }
 
     private onCollision(event: Matter.IEventCollision<Matter.Engine>) {
@@ -116,12 +119,18 @@ export class GameScene extends Container {
     removeElement(element: BallTypeView) {
         element.onDestroy()
         Matter.Composite.remove(this.engine.world, element.getBody())
-        this.app.stage.removeChild(element)
         this.gameManager.elements = this.gameManager.elements.filter((el: BallTypeView) => el != element)
         console.log(`Removed id ${element.getBody().id}. Elements left: ${this.gameManager.elements.length}`)
     }
 
     public update() {
         this.gameManager.elements.forEach((x) => x.update())
+    }
+
+    public onDestroy() {
+        this.disposeSpawner?.unsubscribe()
+        this.disposeTimer?.unsubscribe()
+
+        this?.destroy()
     }
 }

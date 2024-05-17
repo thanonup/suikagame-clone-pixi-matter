@@ -1,6 +1,7 @@
 import { GameScene } from './scripts/Scenes/GameScene'
 import { Application, Graphics } from 'pixi.js'
 import { Bodies, Composite, Engine, Render, Runner } from 'matter-js'
+import { timer } from 'rxjs'
 
 const bootstrap = async () => {
     const backgroundColor = '#fee2b0'
@@ -44,6 +45,11 @@ const bootstrap = async () => {
     app.stage.addChild(gameScene)
     gameScene.doInit()
     app.ticker.add(gameScene.update, gameScene)
+
+    timer(2000).subscribe((_) => {
+        // app.ticker.remove(gameScene.update, gameScene)
+        // app.stage.removeChild(gameScene)
+    })
 
     app.ticker.add((delta) => {})
 }

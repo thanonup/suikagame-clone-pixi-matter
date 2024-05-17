@@ -10,7 +10,7 @@ import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 
 export class BallTypeView extends Container {
-    private app: Application
+    private scene: Container
     private gameplayPod: GameplayPod
     private engine: Matter.Engine
 
@@ -26,11 +26,11 @@ export class BallTypeView extends Container {
         super()
         this.gameManager = GameManager.instance
 
-        this.app = this.gameManager.app
+        this.scene = this.gameManager.currentScene
         this.gameplayPod = this.gameManager.gameplayPod
         this.engine = this.gameManager.engine
 
-        GameObjectConstructor(this.app, this)
+        GameObjectConstructor(this.scene, this)
     }
 
     public doInit(bean: BallBean) {
@@ -58,7 +58,7 @@ export class BallTypeView extends Container {
         this.diposeSubscription = this.pod.ballStateType.subscribe((x) => {
             switch (x) {
                 case BallStateType.Static:
-                    this.gameManager.currentStaticBall = this
+                    this.gameManager.changeStateBallView(this)
                     break
                 case BallStateType.Idle:
                     Matter.Body.setStatic(this.rigidBody, false)
@@ -89,5 +89,7 @@ export class BallTypeView extends Container {
     public onDestroy() {
         this.pod = undefined
         this.diposeSubscription?.unsubscribe()
+
+        this?.destroy()
     }
 }

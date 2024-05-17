@@ -1,11 +1,11 @@
-import { Application, Graphics } from 'pixi.js'
+import { Container, Graphics } from 'pixi.js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { BallTypeView } from './BallTypeView'
 
 export class GameController extends Graphics {
-    private app: Application
+    private scene: Container
     private isClick: boolean = false
 
     private gameManager: GameManager
@@ -13,8 +13,9 @@ export class GameController extends Graphics {
         super()
 
         this.gameManager = GameManager.instance
-        this.app = this.gameManager.app
-        GameObjectConstructor(this.app, this)
+        this.scene = this.gameManager.currentScene
+        // console.log(this.scene)
+        GameObjectConstructor(this.scene, this)
     }
 
     public doInit(width: number, height: number) {
@@ -52,7 +53,7 @@ export class GameController extends Graphics {
     }
 
     private limitMoveBall(xPos: number) {
-        const currentStaticBall = this.gameManager.currentStaticBall
+        const currentStaticBall = this.gameManager.currentStaticBall.value
 
         if (currentStaticBall) {
             currentStaticBall.movePosition(xPos)
@@ -67,13 +68,17 @@ export class GameController extends Graphics {
     }
 
     private onMouseUp(xPos: number) {
-        const currentStaticBall = this.gameManager.currentStaticBall
+        const currentStaticBall = this.gameManager.currentStaticBall.value
         if (currentStaticBall) {
             currentStaticBall.getPod().changeBallState(BallStateType.Idle)
             this.limitMoveBall(xPos)
-            this.gameManager.currentStaticBall = undefined
+            this.gameManager.changeStateBallView(undefined)
         } else {
             console.log('noting ball')
         }
+    }
+
+    public onDestroy() {
+        this?.destroy()
     }
 }

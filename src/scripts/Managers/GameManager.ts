@@ -1,14 +1,15 @@
-import { Application } from 'pixi.js'
+import { Container } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { BallTypeView } from '../Components/BallTypeView'
+import { BehaviorSubject } from 'rxjs'
 
 export class GameManager {
     private static _instance: GameManager
 
-    public app: Application
+    public currentScene: Container
     public gameplayPod: GameplayPod
     public engine: Matter.Engine
-    public currentStaticBall: BallTypeView
+    public currentStaticBall: BehaviorSubject<BallTypeView> = new BehaviorSubject<BallTypeView>(undefined)
     public elements: BallTypeView[] = []
 
     private static getInstance() {
@@ -23,14 +24,18 @@ export class GameManager {
         return this.getInstance()
     }
 
-    public doInit(app: Application, engine: Matter.Engine) {
-        this.app = app
+    public doInit(scene: Container, engine: Matter.Engine) {
+        this.currentScene = scene
         this.engine = engine
 
         this.gameplayPod = new GameplayPod()
     }
 
-    findSpriteWithRigidbody(rb: Matter.Body): BallTypeView {
+    public changeStateBallView(view: BallTypeView) {
+        this.currentStaticBall.next(view)
+    }
+
+    public findSpriteWithRigidbody(rb: Matter.Body): BallTypeView {
         return this.elements.find((element) => element.getBody() === rb)
     }
 }
