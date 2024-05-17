@@ -80,7 +80,7 @@ export class GameScene extends Container {
 
         const ball1 = new BallTypeView()
         ball1.position.set(this.app.screen.width / 2, 50)
-        ball1.doInit(this.gameManager.gameplayPod.ballBeans[3])
+        ball1.doInit(this.gameManager.gameplayPod.ballBeans[0])
         this.gameManager.elements.push(ball1)
 
         // const ball2 = new BallTypeView()
@@ -122,8 +122,6 @@ export class GameScene extends Container {
     }
 
     public update() {
-        //  console.log('update')
-
         this.gameManager.elements.forEach((x) => x.update())
     }
 }
