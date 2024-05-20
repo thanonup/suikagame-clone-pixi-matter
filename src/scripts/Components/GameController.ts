@@ -1,10 +1,12 @@
-import { Container, Graphics } from 'pixi.js'
+import { Application, Container, Graphics } from 'pixi.js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { BallTypeView } from './BallTypeView'
+import { GameScene } from '../Scenes/GameScene'
 
 export class GameController extends Graphics {
+    private app: Application
     private scene: Container
     private isClick: boolean = false
 
@@ -14,6 +16,8 @@ export class GameController extends Graphics {
 
         this.gameManager = GameManager.instance
         this.scene = this.gameManager.currentScene
+        this.app = this.gameManager.app
+
         // console.log(this.scene)
         GameObjectConstructor(this.scene, this)
     }
@@ -58,11 +62,16 @@ export class GameController extends Graphics {
         if (currentStaticBall) {
             currentStaticBall.movePosition(xPos)
             const positionX = currentStaticBall.getBody().position.x
-            if (positionX + currentStaticBall.width / 2 > this.x + this.width) {
-                currentStaticBall.movePosition(this.width + this.x - currentStaticBall.width / 2)
+
+            //offsetScreen = (Width controller size - 375) default screen
+            const offsetScreen = (375 - GameScene.GAME_CONTROLLER_WIDTH) / 2
+
+            if (positionX > this.width) {
+                currentStaticBall.movePosition(this.width + offsetScreen - currentStaticBall.width / 2)
             }
-            if (positionX - currentStaticBall.width / 2 < this.x) {
-                currentStaticBall.movePosition(this.x + currentStaticBall.width / 2)
+
+            if (positionX - currentStaticBall.width / 2 < offsetScreen) {
+                currentStaticBall.movePosition(offsetScreen + currentStaticBall.width / 2)
             }
         }
     }
@@ -76,6 +85,12 @@ export class GameController extends Graphics {
         } else {
             console.log('noting ball')
         }
+    }
+
+    public resize() {
+        console.log('resize gameController')
+
+        this.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
     }
 
     public onDestroy() {

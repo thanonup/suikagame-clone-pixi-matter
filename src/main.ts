@@ -2,6 +2,7 @@ import { GameScene } from './scripts/Scenes/GameScene'
 import { Application, Graphics } from 'pixi.js'
 import { Bodies, Composite, Engine, Render, Runner } from 'matter-js'
 import { timer } from 'rxjs'
+import Matter from 'matter-js'
 
 const bootstrap = async () => {
     const backgroundColor = '#fee2b0'
@@ -43,15 +44,39 @@ const bootstrap = async () => {
 
     let gameScene = new GameScene(app, engine)
     app.stage.addChild(gameScene)
-    gameScene.doInit()
-    app.ticker.add(gameScene.update, gameScene)
+    gameScene.doInit().then(() => {
+        app.ticker.add(gameScene.update, gameScene)
+
+        resize()
+    })
 
     timer(2000).subscribe((_) => {
+        // FOR REMOVE SCENE
         // app.ticker.remove(gameScene.update, gameScene)
         // app.stage.removeChild(gameScene)
     })
 
-    app.ticker.add((delta) => {})
+    window.addEventListener('resize', resize)
+
+    function resize() {
+        console.log('resize')
+        const windowWidth = window.innerWidth
+        const windowHeight = window.innerHeight
+        app.renderer.canvas.style.width = `${windowWidth}px`
+        app.renderer.canvas.style.height = `${windowHeight}px`
+        window.scrollTo(0, 0)
+        app.renderer.resize(windowWidth, windowHeight)
+
+        render.bounds.max.x = windowWidth
+        render.bounds.max.y = windowHeight
+        render.options.width = windowWidth
+        render.options.height = windowHeight
+        render.canvas.width = windowWidth
+        render.canvas.height = windowHeight
+        Matter.Render.setPixelRatio(render, window.devicePixelRatio)
+
+        gameScene.resize()
+    }
 }
 
 bootstrap()

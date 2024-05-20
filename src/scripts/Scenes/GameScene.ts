@@ -8,10 +8,19 @@ import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
 
 export class GameScene extends Container {
+    public static readonly GAME_CONTROLLER_WIDTH: number = 350
+
     private gameManager: GameManager
     private app: Application
     private engine: Matter.Engine
     private gameplayPod: GameplayPod
+
+    private floorGraphic: Graphics
+    private groundBody: Matter.Body
+    private wallLeftBody: Matter.Body
+    private wallRightBody: Matter.Body
+
+    private ball: BallTypeView
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
@@ -21,7 +30,7 @@ export class GameScene extends Container {
         super()
 
         this.gameManager = GameManager.instance
-        this.gameManager.doInit(this, engine)
+        this.gameManager.doInit(this, app, engine)
 
         this.app = app
         this.engine = this.gameManager.engine
@@ -34,65 +43,71 @@ export class GameScene extends Container {
     public async doInit() {
         await this.gameplayPod.loadData()
 
-        const floorGraphic = new Graphics()
-        floorGraphic
-            .rect(this.app.screen.width / 2, this.app.screen.height - 20, 350, 20)
+        this.gameController = new GameController()
+        this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, 637)
+        this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
+        this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
+
+        this.floorGraphic = new Graphics()
+        this.floorGraphic
+            .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH, 20)
             .fill(0xffffff)
-            .pivot.set(floorGraphic.width / 2, floorGraphic.height / 2)
+            .pivot.set(this.floorGraphic.width / 2, this.floorGraphic.height / 2)
+        this.floorGraphic.position.set(
+            this.gameController.x,
+            this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
+        )
 
-        this.addChild(floorGraphic)
+        this.addChild(this.floorGraphic)
 
-        var ground = Bodies.rectangle(
-            floorGraphic.getBounds().x + floorGraphic.width / 2,
-            floorGraphic.getBounds().y + floorGraphic.height / 2,
-            floorGraphic.width,
-            floorGraphic.height,
+        this.groundBody = Bodies.rectangle(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width / 2,
+            this.floorGraphic.getBounds().y + this.floorGraphic.height / 2,
+            this.floorGraphic.width,
+            this.floorGraphic.height,
             {
                 label: 'Ground',
                 isStatic: true,
             }
         )
 
-        var leftWall = Bodies.rectangle(
-            floorGraphic.getBounds().x - floorGraphic.height / 2,
-            window.innerHeight / 2,
-            floorGraphic.height,
-            window.innerHeight,
+        this.wallLeftBody = Bodies.rectangle(
+            this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2,
+            this.floorGraphic.height,
+            this.gameController.height + this.floorGraphic.height,
             {
                 label: 'WallLeft',
                 isStatic: true,
             }
         )
 
-        var rightWall = Bodies.rectangle(
-            floorGraphic.getBounds().x + floorGraphic.width + floorGraphic.height / 2,
-            window.innerHeight / 2,
-            floorGraphic.height,
-            window.innerHeight,
+        this.wallRightBody = Bodies.rectangle(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2,
+            this.floorGraphic.height,
+            this.gameController.height + this.floorGraphic.height,
             {
                 label: 'WallRight',
                 isStatic: true,
             }
         )
 
-        Composite.add(this.engine.world, [ground, leftWall, rightWall])
+        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
-        this.gameController = new GameController()
-        this.gameController.doInit(floorGraphic.width, floorGraphic.getBounds().y)
-        this.gameController.position.set(floorGraphic.getBounds().x, 0)
-
-        const ball = new BallTypeView()
-        ball.position.set(this.app.screen.width / 2, 50)
-        ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
-        this.gameManager.elements.push(ball)
+        this.ball = new BallTypeView()
+        this.ball.position.set(this.app.screen.width / 2, 50)
+        this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+        this.gameManager.elements.push(this.ball)
 
         this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
             if (ball == undefined) {
                 this.disposeTimer = timer(1500).subscribe((_) => {
-                    const ball = new BallTypeView()
-                    ball.position.set(this.app.screen.width / 2, 50)
-                    ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
-                    this.gameManager.elements.push(ball)
+                    this.ball = undefined
+                    this.ball = new BallTypeView()
+                    this.ball.position.set(this.app.screen.width / 2, 50)
+                    this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+                    this.gameManager.elements.push(this.ball)
                 })
             }
         })
@@ -127,10 +142,48 @@ export class GameScene extends Container {
         this.gameManager.elements.forEach((x) => x.update())
     }
 
+    public resize() {
+        console.log('resize scene ')
+        this.gameController.resize()
+
+        this.floorGraphic.position.set(
+            this.gameController.x,
+            this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
+        )
+
+        Matter.Body.setPosition(this.groundBody, {
+            x: this.floorGraphic.getBounds().x + this.floorGraphic.width / 2,
+            y: this.floorGraphic.getBounds().y + this.floorGraphic.height / 2,
+        })
+
+        Matter.Body.setPosition(this.wallLeftBody, {
+            x: this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            y: this.app.screen.height / 2 - this.floorGraphic.height / 2,
+        })
+
+        Matter.Body.setPosition(this.wallRightBody, {
+            x: this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            y: this.app.screen.height / 2 - this.floorGraphic.height / 2,
+        })
+
+        //   this.floorGraphic.position.set(this.app.screen.width / 2 - this.floorGraphic.width / 2 - this.getBounds().x, 0)
+
+        //   this.floorGraphic.pivot.set(this.floorGraphic.width / 2, this.floorGraphic.height / 2)
+    }
+
     public onDestroy() {
         this.disposeSpawner?.unsubscribe()
         this.disposeTimer?.unsubscribe()
 
         this?.destroy()
+    }
+
+    normalize(val: number, min: number, max: number): number {
+        return +Math.max(min, Math.min(val, max)).toFixed(2)
+        //  return Math.Clamp(+((val - min) / (max - min)).toFixed(2), 0, 1)
+    }
+
+    inverseNormalize(normalizeVal: number, min: number, max: number): number {
+        return +(normalizeVal * (max - min) + min).toFixed(2)
     }
 }

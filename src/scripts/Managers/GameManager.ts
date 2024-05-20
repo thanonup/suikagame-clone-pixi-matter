@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js'
+import { Application, Container } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { BallTypeView } from '../Components/BallTypeView'
 import { BehaviorSubject } from 'rxjs'
@@ -6,6 +6,7 @@ import { BehaviorSubject } from 'rxjs'
 export class GameManager {
     private static _instance: GameManager
 
+    public app: Application
     public currentScene: Container
     public gameplayPod: GameplayPod
     public engine: Matter.Engine
@@ -24,9 +25,10 @@ export class GameManager {
         return this.getInstance()
     }
 
-    public doInit(scene: Container, engine: Matter.Engine) {
+    public doInit(scene: Container, app: Application, engine: Matter.Engine) {
         this.currentScene = scene
         this.engine = engine
+        this.app = app
 
         this.gameplayPod = new GameplayPod()
     }
