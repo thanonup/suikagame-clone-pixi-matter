@@ -63,15 +63,12 @@ export class GameController extends Graphics {
             currentStaticBall.movePosition(xPos)
             const positionX = currentStaticBall.getBody().position.x
 
-            //offsetScreen = (Width controller size - 375) default screen
-            const offsetScreen = (375 - GameScene.GAME_CONTROLLER_WIDTH) / 2
-
-            if (positionX > this.width) {
-                currentStaticBall.movePosition(this.width + offsetScreen - currentStaticBall.width / 2)
+            if (positionX > this.app.screen.width / 2 + this.width / 2 - currentStaticBall.width / 2) {
+                currentStaticBall.movePosition(this.app.screen.width / 2 + this.width / 2 - currentStaticBall.width / 2)
             }
 
-            if (positionX - currentStaticBall.width / 2 < offsetScreen) {
-                currentStaticBall.movePosition(offsetScreen + currentStaticBall.width / 2)
+            if (positionX < this.app.screen.width / 2 - this.width / 2 + currentStaticBall.width / 2) {
+                currentStaticBall.movePosition(this.app.screen.width / 2 - this.width / 2 + currentStaticBall.width / 2)
             }
         }
     }
@@ -88,8 +85,6 @@ export class GameController extends Graphics {
     }
 
     public resize() {
-        console.log('resize gameController')
-
         this.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
     }
 

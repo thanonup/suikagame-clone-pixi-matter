@@ -82,6 +82,10 @@ export class BallTypeView extends Container {
         return this.pod
     }
 
+    public freezeBall() {
+        Matter.Body.setStatic(this.rigidBody, true)
+    }
+
     public movePosition(xPos: number) {
         Matter.Body.setPosition(this.rigidBody, { x: xPos, y: this.rigidBody.position.y })
     }
@@ -91,5 +95,14 @@ export class BallTypeView extends Container {
         this.diposeSubscription?.unsubscribe()
 
         this?.destroy()
+    }
+
+    normalize(val: number, min: number, max: number): number {
+        return +Math.max(min, Math.min(val, max)).toFixed(2)
+        //  return Math.Clamp(+((val - min) / (max - min)).toFixed(2), 0, 1)
+    }
+
+    inverseNormalize(normalizeVal: number, min: number, max: number): number {
+        return +(normalizeVal * (max - min) + min).toFixed(2)
     }
 }

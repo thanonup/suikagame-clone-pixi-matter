@@ -59,7 +59,6 @@ const bootstrap = async () => {
     window.addEventListener('resize', resize)
 
     function resize() {
-        console.log('resize')
         const windowWidth = window.innerWidth
         const windowHeight = window.innerHeight
         app.renderer.canvas.style.width = `${windowWidth}px`

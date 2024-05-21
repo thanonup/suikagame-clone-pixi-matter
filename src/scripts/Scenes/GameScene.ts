@@ -6,9 +6,11 @@ import { GameManager } from '../Managers/GameManager'
 import Matter from 'matter-js'
 import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
+import { BallStateType } from '../Types/BallStateType'
 
 export class GameScene extends Container {
     public static readonly GAME_CONTROLLER_WIDTH: number = 350
+    public static readonly GAME_CONTROLLER_HEIGHT: number = 637
 
     private gameManager: GameManager
     private app: Application
@@ -44,7 +46,7 @@ export class GameScene extends Container {
         await this.gameplayPod.loadData()
 
         this.gameController = new GameController()
-        this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, 637)
+        this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)
         this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
         this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
 
@@ -96,17 +98,27 @@ export class GameScene extends Container {
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
         this.ball = new BallTypeView()
-        this.ball.position.set(this.app.screen.width / 2, 50)
+        this.ball.position.set(
+            this.app.screen.width / 2,
+            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
+        )
         this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
         this.gameManager.elements.push(this.ball)
 
         this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
             if (ball == undefined) {
+                this.ball = undefined
                 this.disposeTimer = timer(1500).subscribe((_) => {
-                    this.ball = undefined
                     this.ball = new BallTypeView()
-                    this.ball.position.set(this.app.screen.width / 2, 50)
-                    this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+                    this.ball.position.set(
+                        this.app.screen.width / 2,
+                        this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
+                    )
+                    this.ball.doInit(
+                        this.gameManager.gameplayPod.ballBeans[
+                            this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)
+                        ]
+                    )
                     this.gameManager.elements.push(this.ball)
                 })
             }
@@ -143,7 +155,6 @@ export class GameScene extends Container {
     }
 
     public resize() {
-        console.log('resize scene ')
         this.gameController.resize()
 
         this.floorGraphic.position.set(
@@ -166,9 +177,26 @@ export class GameScene extends Container {
             y: this.app.screen.height / 2 - this.floorGraphic.height / 2,
         })
 
-        //   this.floorGraphic.position.set(this.app.screen.width / 2 - this.floorGraphic.width / 2 - this.getBounds().x, 0)
+        if (this.ball != undefined) {
+            Matter.Body.setPosition(this.ball.getBody(), {
+                x: this.app.screen.width / 2,
+                y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50,
+            })
+        }
 
-        //   this.floorGraphic.pivot.set(this.floorGraphic.width / 2, this.floorGraphic.height / 2)
+        this.gameManager.elements.forEach((x) => {
+            if (x.getPod().ballStateType.value != BallStateType.Static) {
+                //   console.log(x.getBody().position.x)
+                x.freezeBall()
+                this.getNewPositionResize(x.getBody().position.x, x.width)
+                Matter.Body.setPosition(x.getBody(), {
+                    x: this.gameController.x,
+                    y: this.gameController.y,
+                })
+            }
+        })
+
+        this.gameManager.originalWidth = this.app.screen.width
     }
 
     public onDestroy() {
@@ -178,8 +206,22 @@ export class GameScene extends Container {
         this?.destroy()
     }
 
+    getNewPositionResize(xPos: number, ballWidth: number) {
+        const normalizeValue = this.normalize(
+            xPos,
+            this.gameManager.originalWidth / 2 - this.gameController.width / 2 + ballWidth / 2,
+            this.gameManager.originalWidth / 2 + this.gameController.width / 2 - ballWidth / 2
+        )
+        console.log(xPos)
+        console.log(normalizeValue)
+    }
+
+    randomIntFromInterval(min, max) {
+        return Math.floor(Math.random() * (max - min + 1) + min)
+    }
+
     normalize(val: number, min: number, max: number): number {
-        return +Math.max(min, Math.min(val, max)).toFixed(2)
+        return +((val - min) / (max - min)).toFixed(2)
         //  return Math.Clamp(+((val - min) / (max - min)).toFixed(2), 0, 1)
     }
 

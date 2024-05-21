@@ -13,6 +13,8 @@ export class GameManager {
     public currentStaticBall: BehaviorSubject<BallTypeView> = new BehaviorSubject<BallTypeView>(undefined)
     public elements: BallTypeView[] = []
 
+    public originalWidth: number
+
     private static getInstance() {
         if (!GameManager._instance) {
             GameManager._instance = new GameManager()
