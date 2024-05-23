@@ -5,7 +5,7 @@ import { BehaviorSubject } from 'rxjs';
 
 export class GameplayPod {
     public ballBeans: BallBean[] = []
-    public gameplayState:BehaviorSubject<GameplayState> = new BehaviorSubject<GameplayState>(GameplayState.StartState);
+    public gameplayState:BehaviorSubject<GameplayState> = new BehaviorSubject<GameplayState>(GameplayState.GameplayState);
 
     public async loadData() {
         const data = await Assets.load<BallBean[]>('/assets/ball-data.json')

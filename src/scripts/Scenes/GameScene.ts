@@ -1,4 +1,3 @@
-import { Application, Assets, Container, Graphics, Loader, Renderer, Sprite } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { BallTypeView } from '../Components/BallTypeView'
 import { Bodies, Composite } from 'matter-js'
@@ -8,30 +7,38 @@ import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
-import { GameStartButtonView } from '../GameStartButtonView'
+import { RestartButtonView } from '../RestartButtonView'
+import * as PIXI from "pixi.js";
+import { gsap } from "gsap";
+import { PixiPlugin } from "gsap/PixiPlugin";
 
-export class GameScene extends Container {
+
+gsap.registerPlugin(PixiPlugin);
+PixiPlugin.registerPIXI(PIXI);
+
+export class GameScene extends PIXI.Container {
     public static readonly GAME_CONTROLLER_WIDTH: number = 350
     public static readonly GAME_CONTROLLER_HEIGHT: number = 637
 
     private gameManager: GameManager
-    private app: Application
+    private app: PIXI.Application
     private engine: Matter.Engine
     private gameplayPod: GameplayPod
 
-    private floorGraphic: Graphics
+    private floorGraphic: PIXI.Graphics
     private groundBody: Matter.Body
     private wallLeftBody: Matter.Body
     private wallRightBody: Matter.Body
+    private gameOverBody: Matter.Body
 
     private ball: BallTypeView
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
     private gameController: GameController
-    private gameStartButton : GameStartButtonView
+    private gameStartButton : RestartButtonView
 
-    constructor(app: Application, engine: Matter.Engine) {
+    constructor(app: PIXI.Application, engine: Matter.Engine) {
         super()
 
         this.gameManager = GameManager.instance
@@ -47,13 +54,14 @@ export class GameScene extends Container {
 
     public async doInit() {
         await this.gameplayPod.loadData()
+        this.SubscribeSetup();
 
         this.gameController = new GameController()
         this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)
         this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
         this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
 
-        this.floorGraphic = new Graphics()
+        this.floorGraphic = new PIXI.Graphics()
         this.floorGraphic
             .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH, 20)
             .fill(0xffffff)
@@ -98,9 +106,20 @@ export class GameScene extends Container {
             }
         )
 
-        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
-
-        this.ballSpawnAndSetting()
+        this.gameOverBody = Bodies.rectangle(
+            this.app.screen.width/2,
+            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height)/2 ,
+            this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height)/2+75 ,
+            this.floorGraphic.width,
+            this.floorGraphic.height,
+            {
+                label: 'gemeOverBody',
+                isStatic: true,
+                isSensor:true
+            }
+        )
+        // this.gameOverBody.render.visible = false;
+        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody,this.gameOverBody])
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
@@ -109,7 +128,7 @@ export class GameScene extends Container {
             this.onDestroy()
         })
 
-        this.gameStartButton = new GameStartButtonView;
+        this.gameStartButton = new RestartButtonView;
         this.gameStartButton.position.set(this.app.screen.width/2,this.app.screen.height/2);
     }
 
@@ -143,11 +162,16 @@ export class GameScene extends Container {
     private onCollision(event: Matter.IEventCollision<Matter.Engine>) {
         event.pairs.forEach((collision) => {
             let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
+            let bodys= [collision.bodyA,collision.bodyB]
+            const ballBody = bodys.find(x=>x.label=='Ball')
+            const gameOverBody = bodys.find(x=>x.label=='gemeOverBody')
 
-            if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
-                const element = this.gameManager.findSpriteWithRigidbody(bodyA)
-                // if (element) this.removeElement(element)
-            }
+            
+            if(ballBody!=undefined && gameOverBody!=undefined)
+                {
+                    const element = this.gameManager.findSpriteWithRigidbody(ballBody);
+                    console.log('gameOver');
+                }
         })
     }
 
@@ -212,11 +236,12 @@ export class GameScene extends Container {
         this.gameplayPod.gameplayState.subscribe(state=>{
             switch(state)
             {
-                case GameplayState.StartState :
-                        break;
                 case GameplayState.GameplayState :
+                    { 
+                        this.gameManager.elements.forEach(x=>this.removeElement(x));
                         this.ballSpawnAndSetting();
                         break;
+                    }
                 case GameplayState.EndState :
                         break;
             }

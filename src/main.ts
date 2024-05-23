@@ -1,6 +1,6 @@
 import { GameScene } from './scripts/Scenes/GameScene'
-import { Application, Graphics } from 'pixi.js'
-import { Bodies, Composite, Engine, Render, Runner } from 'matter-js'
+import { Application,Assets} from 'pixi.js'
+import {  Engine, Render, Runner } from 'matter-js'
 import { timer } from 'rxjs'
 import Matter from 'matter-js'
 
@@ -14,6 +14,8 @@ const bootstrap = async () => {
         height: window.innerHeight,
         backgroundColor,
     })
+
+    await preload();
 
     var container = document.getElementById('container')
 
@@ -76,6 +78,14 @@ const bootstrap = async () => {
 
         gameScene.resize()
     }
+}
+
+async function preload(){
+    await Assets.addBundle('uiSprite',{
+        start:'src/sprites/Start.png',
+        gameOver:'src/sprites/GameOver.png',
+        restart:'src/sprites/restart.png',
+    });
 }
 
 bootstrap()
