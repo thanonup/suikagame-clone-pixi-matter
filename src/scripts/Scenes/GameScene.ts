@@ -138,7 +138,7 @@ export class GameScene extends PIXI.Container {
             this.app.screen.width / 2,
             this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
         )
-        this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0])
+        this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0], 0)
         this.gameManager.elements.push(this.ball)
 
         this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
@@ -150,9 +150,9 @@ export class GameScene extends PIXI.Container {
                         this.app.screen.width / 2,
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
-                    this.ball.doInit(
-                        this.gameManager.gameplayPod.ballBeans[this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)]
-                    )
+
+                    const randIndex = 0 //this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)
+                    this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
                     this.gameManager.elements.push(this.ball)
                 })
             }
@@ -172,6 +172,32 @@ export class GameScene extends PIXI.Container {
                     const element = this.gameManager.findSpriteWithRigidbody(ballBody);
                     console.log('gameOver');
                 }
+                
+            if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
+                const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
+                const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+
+                if (elementA && elementB) {
+                    const ballAPod = elementA.getPod()
+                    const ballBPod = elementB.getPod()
+
+                    if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
+                        if (
+                            ballAPod.ballStateType.value == BallStateType.Idle &&
+                            ballBPod.ballStateType.value == BallStateType.Idle
+                        ) {
+                            this.removeElement(elementA)
+
+                            if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1)
+                                ballBPod.currentIndex++
+
+                            ballBPod.changeCurrentBallBean(
+                                this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex]
+                            )
+                        }
+                    }
+                }
+            }
         })
     }
 
