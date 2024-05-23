@@ -141,7 +141,7 @@ export class GameScene extends Container {
 
             if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
                 const element = this.gameManager.findSpriteWithRigidbody(bodyA)
-                if (element) this.removeElement(element)
+                // if (element) this.removeElement(element)
             }
         })
     }
@@ -189,17 +189,18 @@ export class GameScene extends Container {
 
         this.gameManager.elements.forEach((x) => {
             if (x.getPod().ballStateType.value != BallStateType.Static) {
-                //   console.log(x.getBody().position.x)
-                x.freezeBall()
-                this.getNewPositionResize(x.getBody().position.x, x.width)
+                x.freezeBall(true)
+                const newPos = this.getNewPositionResize(x.getBody().position.x, x.getBody().position.y, x.width)
+                console.log(newPos)
                 Matter.Body.setPosition(x.getBody(), {
-                    x: this.gameController.x,
-                    y: this.gameController.y,
+                    x: newPos.x,
+                    y: newPos.y,
                 })
+                x.freezeBall(false)
             }
         })
 
-        this.gameManager.originalWidth = this.app.screen.width
+        this.gameManager.originalScreen = { width: this.app.screen.width, height: this.app.screen.height }
     }
 
     private SubscribeSetup(){
@@ -225,14 +226,31 @@ export class GameScene extends Container {
         this?.destroy()
     }
 
-    getNewPositionResize(xPos: number, ballWidth: number) {
-        const normalizeValue = this.normalize(
+    getNewPositionResize(xPos: number, yPos: number, ballWidth: number) {
+        const normalizeXValue = this.normalize(
             xPos,
-            this.gameManager.originalWidth / 2 - this.gameController.width / 2 + ballWidth / 2,
-            this.gameManager.originalWidth / 2 + this.gameController.width / 2 - ballWidth / 2
+            this.gameManager.originalScreen.width / 2 - this.gameController.width / 2 + ballWidth / 2,
+            this.gameManager.originalScreen.width / 2 + this.gameController.width / 2 - ballWidth / 2
         )
-        console.log(xPos)
-        console.log(normalizeValue)
+
+        const normalizeYValue = this.normalize(
+            yPos,
+            this.gameManager.originalScreen.height / 2 - this.gameController.height / 2 + ballWidth / 2,
+            this.gameManager.originalScreen.height / 2 + this.gameController.height / 2 - ballWidth / 2
+        )
+
+        return {
+            x: this.inverseNormalize(
+                normalizeXValue,
+                this.app.screen.width / 2 - this.gameController.width / 2 + ballWidth / 2,
+                this.app.screen.width / 2 + this.gameController.width / 2 - ballWidth / 2
+            ),
+            y: this.inverseNormalize(
+                normalizeYValue,
+                this.app.screen.height / 2 - this.gameController.height / 2 + ballWidth / 2,
+                this.app.screen.height / 2 + this.gameController.height / 2 - ballWidth / 2
+            ),
+        }
     }
 
     randomIntFromInterval(min, max) {
@@ -240,11 +258,10 @@ export class GameScene extends Container {
     }
 
     normalize(val: number, min: number, max: number): number {
-        return +((val - min) / (max - min)).toFixed(2)
-        //  return Math.Clamp(+((val - min) / (max - min)).toFixed(2), 0, 1)
+        return +((val - min) / (max - min)).toFixed(4)
     }
 
     inverseNormalize(normalizeVal: number, min: number, max: number): number {
-        return +(normalizeVal * (max - min) + min).toFixed(2)
+        return +(normalizeVal * (max - min) + min).toFixed(1)
     }
 }

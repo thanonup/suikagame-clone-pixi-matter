@@ -13,7 +13,7 @@ export class GameManager {
     public currentStaticBall: BehaviorSubject<BallTypeView> = new BehaviorSubject<BallTypeView>(undefined)
     public elements: BallTypeView[] = []
 
-    public originalWidth: number
+    public originalScreen: { width: number; height: number }
 
     private static getInstance() {
         if (!GameManager._instance) {

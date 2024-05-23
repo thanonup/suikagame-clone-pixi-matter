@@ -61,7 +61,7 @@ export class BallTypeView extends Container {
                     this.gameManager.changeStateBallView(this)
                     break
                 case BallStateType.Idle:
-                    Matter.Body.setStatic(this.rigidBody, false)
+                    this.freezeBall(false)
                     break
                 case BallStateType.Merge:
                     break
@@ -82,8 +82,8 @@ export class BallTypeView extends Container {
         return this.pod
     }
 
-    public freezeBall() {
-        Matter.Body.setStatic(this.rigidBody, true)
+    public freezeBall(isFreeze: boolean) {
+        Matter.Body.setStatic(this.rigidBody, isFreeze)
     }
 
     public movePosition(xPos: number) {
