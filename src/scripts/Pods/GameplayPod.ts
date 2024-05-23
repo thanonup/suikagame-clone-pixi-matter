@@ -14,4 +14,9 @@ export class GameplayPod {
         console.log('------Data Ball-------')
         console.log(this.ballBeans)
     }
+    
+    public setGameplayState(state: GameplayState)
+    {
+        this.gameplayState.next(state);
+    }
 }

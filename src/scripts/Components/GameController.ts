@@ -2,8 +2,7 @@ import { Application, Container, Graphics } from 'pixi.js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
-import { BallTypeView } from './BallTypeView'
-import { GameScene } from '../Scenes/GameScene'
+import { GameplayState } from '../Enum/GameplayState'
 
 export class GameController extends Graphics {
     private app: Application
@@ -43,7 +42,6 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointerup', (event) => {
-            console.log('test');
             if (this.isClick) {
                 this.isClick = false
                 this.onMouseUp(event.x)
@@ -75,6 +73,10 @@ export class GameController extends Graphics {
     }
 
     private onMouseUp(xPos: number) {
+
+        if(this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState)
+            return;
+
         const currentStaticBall = this.gameManager.currentStaticBall.value
         if (currentStaticBall) {
             currentStaticBall.getPod().changeBallState(BallStateType.Idle)

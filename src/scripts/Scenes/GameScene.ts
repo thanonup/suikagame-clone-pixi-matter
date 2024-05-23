@@ -8,6 +8,7 @@ import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
+import { GameStartButtonView } from '../GameStartButtonView'
 
 export class GameScene extends Container {
     public static readonly GAME_CONTROLLER_WIDTH: number = 350
@@ -28,6 +29,7 @@ export class GameScene extends Container {
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
     private gameController: GameController
+    private gameStartButton : GameStartButtonView
 
     constructor(app: Application, engine: Matter.Engine) {
         super()
@@ -98,7 +100,7 @@ export class GameScene extends Container {
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
-        this.BallSpawnAndSetting()
+        this.ballSpawnAndSetting()
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
@@ -106,9 +108,12 @@ export class GameScene extends Container {
         this.on('removed', () => {
             this.onDestroy()
         })
+
+        this.gameStartButton = new GameStartButtonView;
+        this.gameStartButton.position.set(this.app.screen.width/2,this.app.screen.height/2);
     }
 
-    private BallSpawnAndSetting() {
+    private ballSpawnAndSetting() {
         this.ball = new BallTypeView()
         this.ball.position.set(
             this.app.screen.width / 2,
@@ -210,7 +215,7 @@ export class GameScene extends Container {
                 case GameplayState.StartState :
                         break;
                 case GameplayState.GameplayState :
-                        this.BallSpawnAndSetting();
+                        this.ballSpawnAndSetting();
                         break;
                 case GameplayState.EndState :
                         break;
