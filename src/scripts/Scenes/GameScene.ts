@@ -7,6 +7,7 @@ import Matter from 'matter-js'
 import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
+import { GameplayState } from '../Enum/GameplayState'
 
 export class GameScene extends Container {
     public static readonly GAME_CONTROLLER_WIDTH: number = 350
@@ -97,6 +98,17 @@ export class GameScene extends Container {
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
+        this.BallSpawnAndSetting()
+
+        console.log('------All Bodies-------')
+        console.log(Composite.allBodies(this.engine.world))
+
+        this.on('removed', () => {
+            this.onDestroy()
+        })
+    }
+
+    private BallSpawnAndSetting() {
         this.ball = new BallTypeView()
         this.ball.position.set(
             this.app.screen.width / 2,
@@ -115,20 +127,11 @@ export class GameScene extends Container {
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
                     this.ball.doInit(
-                        this.gameManager.gameplayPod.ballBeans[
-                            this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)
-                        ]
+                        this.gameManager.gameplayPod.ballBeans[this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)]
                     )
                     this.gameManager.elements.push(this.ball)
                 })
             }
-        })
-
-        console.log('------All Bodies-------')
-        console.log(Composite.allBodies(this.engine.world))
-
-        this.on('removed', () => {
-            this.onDestroy()
         })
     }
 
@@ -199,6 +202,22 @@ export class GameScene extends Container {
         this.gameManager.originalWidth = this.app.screen.width
     }
 
+    private SubscribeSetup(){
+        this.gameplayPod.gameplayState.subscribe(state=>{
+            switch(state)
+            {
+                case GameplayState.StartState :
+                        break;
+                case GameplayState.GameplayState :
+                        this.BallSpawnAndSetting();
+                        break;
+                case GameplayState.EndState :
+                        break;
+            }
+
+        });
+    }
+    
     public onDestroy() {
         this.disposeSpawner?.unsubscribe()
         this.disposeTimer?.unsubscribe()

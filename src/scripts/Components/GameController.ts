@@ -43,6 +43,7 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointerup', (event) => {
+            console.log('test');
             if (this.isClick) {
                 this.isClick = false
                 this.onMouseUp(event.x)
