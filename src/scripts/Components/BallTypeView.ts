@@ -18,6 +18,8 @@ export class BallTypeView extends Container {
     private rigidBody: Matter.Body
 
     private diposeSubscription: Subscription
+    private beanSubscription: Subscription
+    private delaySubscription: Subscription
 
     private pod: BallTypePod
     private gameManager: GameManager
@@ -33,28 +35,19 @@ export class BallTypeView extends Container {
         GameObjectConstructor(this.scene, this)
     }
 
-    public doInit(bean: BallBean) {
+    public doInit(bean: BallBean, index: number) {
         this.pod = new BallTypePod(bean)
+        this.pod.currentIndex = index
 
         this.circle = new Graphics()
-        this.circle.circle(0, 0, bean.size).fill(bean.colorCode)
+        this.circle.circle(0, 0, bean.size).fill(0xffffff)
 
         this.addChild(this.circle)
 
-        this.rigidBody = Bodies.circle(
-            this.circle.getBounds().x + this.circle.width / 2,
-            this.circle.getBounds().y + this.circle.height / 2,
-            bean.size,
-            {
-                label: 'Ball',
-                restitution: 0.2,
-                isStatic: true,
-                angle: 4.7,
-            }
-        )
+        this.setSubscription()
+    }
 
-        Composite.add(this.engine.world, [this.rigidBody])
-
+    private setSubscription() {
         this.diposeSubscription = this.pod.ballStateType.subscribe((x) => {
             switch (x) {
                 case BallStateType.Static:
@@ -64,8 +57,40 @@ export class BallTypeView extends Container {
                     this.freezeBall(false)
                     break
                 case BallStateType.Merge:
+                    // this.delaySubscription = timer(1500).subscribe((_) => {
+                    //
+                    // })
                     break
             }
+        })
+
+        this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
+            console.log(bean.colorCode)
+            this.circle.tint = bean.colorCode
+            this.circle.setSize(bean.size * 2)
+
+            const oldBody = this.rigidBody
+
+            this.rigidBody = undefined
+            this.rigidBody = Bodies.circle(
+                this.circle.getBounds().x + this.circle.width / 2,
+                this.circle.getBounds().y + this.circle.height / 2,
+                bean.size,
+                {
+                    label: 'Ball',
+                    restitution: 0.2,
+                    isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
+                    angle: 4.7,
+                }
+            )
+
+            Composite.add(this.engine.world, [this.rigidBody])
+
+            if (oldBody != undefined) {
+                Composite.remove(this.engine.world, [oldBody])
+            }
+
+            if (this.pod.ballStateType.value != BallStateType.Static) this.pod.changeBallState(BallStateType.Idle)
         })
     }
 
@@ -93,13 +118,14 @@ export class BallTypeView extends Container {
     public onDestroy() {
         this.pod = undefined
         this.diposeSubscription?.unsubscribe()
+        this.beanSubscription?.unsubscribe()
+        this.delaySubscription?.unsubscribe()
 
         this?.destroy()
     }
 
     normalize(val: number, min: number, max: number): number {
         return +Math.max(min, Math.min(val, max)).toFixed(2)
-        //  return Math.Clamp(+((val - min) / (max - min)).toFixed(2), 0, 1)
     }
 
     inverseNormalize(normalizeVal: number, min: number, max: number): number {
