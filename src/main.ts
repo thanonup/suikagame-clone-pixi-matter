@@ -86,8 +86,6 @@ async function preload() {
         gameOver: 'src/sprites/GameOver.png',
         restart: 'src/sprites/restart.png',
     })
-
-    await Assets.add({ alias: 'pixelFont', src: 'assets/font/Pixelpoint.ttf' })
 }
 
 bootstrap()

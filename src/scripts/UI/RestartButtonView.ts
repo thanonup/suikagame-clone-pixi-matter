@@ -9,7 +9,6 @@ export class RestartButtonView extends Container {
     private app: Application
     constructor() {
         super()
-
         this.doInit()
     }
 
@@ -49,14 +48,10 @@ export class RestartButtonView extends Container {
 
         button.height = 50
         button.width = 100
-        button.scale = 0
+        this.scale = 0
         this.addChild(button)
         this.app.stage.addChild(this)
-        button.onPress.connect(() => {
-            this.onClose().then(() => {
-                GameManager.instance.gameplayPod.setGameplayState(GameplayState.GameplayState)
-            })
-        })
+        button.onPress.connect(() => this.onClose())
     }
 
     private setupSubscribe() {
@@ -81,5 +76,6 @@ export class RestartButtonView extends Container {
             },
             duration: 0.3,
         })
+        GameManager.instance.gameplayPod.setGameplayState(GameplayState.GameplayState)
     }
 }

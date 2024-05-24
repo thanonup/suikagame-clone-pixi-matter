@@ -35,6 +35,8 @@ export class GameScene extends PIXI.Container {
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
+    private disposeGameOver: Subscription
+
     private gameController: GameController
     private restartButtonView: RestartButtonView
     private gameScoreView: GameScoreView
@@ -111,8 +113,10 @@ export class GameScene extends PIXI.Container {
 
         this.gameOverBody = Bodies.rectangle(
             this.app.screen.width / 2,
-            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height)/2 ,
-            this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2 + 75,
+            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2,
+            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2 + 75,
+            this.floorGraphic.getBounds().y / 2 + 200,
+
             this.floorGraphic.width,
             this.floorGraphic.height,
             {
@@ -133,10 +137,13 @@ export class GameScene extends PIXI.Container {
 
         this.restartButtonView = new RestartButtonView()
         this.restartButtonView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
-        this.gameScoreView = new GameScoreView()
+        this.gameScoreView = new GameScoreView(this.floorGraphic)
     }
 
     private ballSpawnAndSetting() {
+        this.disposeSpawner?.unsubscribe()
+        this.disposeTimer?.unsubscribe()
+
         this.ball = new BallTypeView()
         this.ball.position.set(
             this.app.screen.width / 2,
@@ -148,7 +155,8 @@ export class GameScene extends PIXI.Container {
         this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
             if (ball == undefined) {
                 this.ball = undefined
-                this.disposeTimer = timer(1500).subscribe((_) => {
+                // this.disposeTimer = timer(1000).subscribe((_) => {
+                this.disposeTimer = timer(100).subscribe((_) => {
                     this.ball = new BallTypeView()
                     this.ball.position.set(
                         this.app.screen.width / 2,
@@ -169,19 +177,34 @@ export class GameScene extends PIXI.Container {
 
     private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
+
+        if (this.isBallsIngameOverZone(event) && this.disposeGameOver == undefined) {
+            this.disposeGameOver = timer(3000).subscribe((_) => {
+                this.gameManager.gameplayPod.setGameplayState(GameplayState.GameOverState)
+            })
+        } else if (!this.isBallsIngameOverZone(event) && this.disposeGameOver != undefined) {
+            this.disposeGameOver?.unsubscribe()
+            this.disposeGameOver = undefined
+        }
+    }
+
+    private isBallsIngameOverZone(event: Matter.IEventCollision<Matter.Engine>) {
+        let isBallsInZone = false
+        event.pairs.forEach((collision) => {
+            const bodys = [collision.bodyA, collision.bodyB]
+            const ballBody = bodys.find((x) => x.label == 'Ball')
+            const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
+
+            if (gameOverBody != undefined && gameOverBody != undefined) {
+                const element = this.gameManager.findSpriteWithRigidbody(ballBody)
+                if (element?.getPod().ballStateType.value == BallStateType.Idle) isBallsInZone = true
+            }
+        })
+        return isBallsInZone
     }
 
     private doOnTrigger(collision: Matter.Pair) {
         let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
-
-        let bodys = [collision.bodyA, collision.bodyB]
-        const ballBody = bodys.find((x) => x.label == 'Ball')
-        const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
-
-        if (ballBody != undefined && gameOverBody != undefined) {
-            const element = this.gameManager.findSpriteWithRigidbody(ballBody)
-            // console.log('gameOver')
-        }
 
         if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
             const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
@@ -222,7 +245,7 @@ export class GameScene extends PIXI.Container {
         element.onDestroy()
         Matter.Composite.remove(this.engine.world, element.getBody())
         this.gameManager.elements = this.gameManager.elements.filter((el: BallTypeView) => el != element)
-        console.log(`Removed id ${element.getBody().id}. Elements left: ${this.gameManager.elements.length}`)
+        // console.log(`Removed id ${element.getBody().id}. Elements left: ${this.gameManager.elements.length}`)
     }
 
     public update() {
@@ -283,7 +306,7 @@ export class GameScene extends PIXI.Container {
                     this.ballSpawnAndSetting()
                     break
                 }
-                case GameplayState.EndState:
+                case GameplayState.GameOverState:
                     break
             }
         })

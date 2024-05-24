@@ -1,6 +1,7 @@
-import { Application, Container, Text, TextStyle } from 'pixi.js'
+import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
 import { GameManager } from '../Managers/GameManager'
-import { Observable, Subject, Subscription, interval, take, takeUntil, takeWhile, timer } from 'rxjs'
+import { Subscription, interval, takeWhile } from 'rxjs'
+import { GameplayState } from '../Enum/GameplayState'
 
 export class GameScoreView extends Container {
     private scoreText: Text
@@ -8,9 +9,12 @@ export class GameScoreView extends Container {
     private app: Application
     private score: number = 0
     private tweeningScore: Subscription = undefined
+    private floorGraphic: Graphics
 
-    constructor() {
+    constructor(floorGraphic: Graphics) {
         super()
+        this.floorGraphic = floorGraphic
+
         this.gameManager = GameManager.instance
         this.app = this.gameManager.app
 
@@ -20,7 +24,7 @@ export class GameScoreView extends Container {
         })
         this.scoreText = new Text('0', style)
         this.scoreText.anchor = 0.5
-        this.position.set(this.app.screen.width / 2, 30)
+        this.position.set(this.floorGraphic.getBounds().x + 30, 30)
         this.addChild(this.scoreText)
         this.app.stage.addChild(this)
         this.setupSubScribe()
@@ -28,14 +32,35 @@ export class GameScoreView extends Container {
 
     private setupSubScribe() {
         this.gameManager.score.subscribe((score) => {
-            console.log(score)
-            const intervalTime = interval(50)
+            if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
 
+            const intervalTime = interval(50)
             this.tweeningScore?.unsubscribe()
             this.tweeningScore = intervalTime.pipe(takeWhile(() => this.score < score)).subscribe(() => {
                 this.score++
                 this.scoreText.text = this.score
             })
+        })
+
+        this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
+            if (state === GameplayState.GameplayState) {
+                this.score = 0
+                this.scoreText.text = this.score
+            }
+
+            switch (state) {
+                case GameplayState.GameplayState: {
+                    this.score = 0
+                    this.scoreText.text = this.score
+                    break
+                }
+                case GameplayState.GameOverState: {
+                    this.tweeningScore?.unsubscribe()
+                    this.score = this.gameManager.score.value
+                    this.scoreText.text = this.score
+                    break
+                }
+            }
         })
     }
 }

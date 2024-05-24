@@ -72,15 +72,29 @@ export class GameController extends Graphics {
         }
     }
 
-    private onMouseUp(xPos: number) {
-
-        if(this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState)
-            return;
-
+    private getClampPositionX(xPos: number) {
         const currentStaticBall = this.gameManager.currentStaticBall.value
         if (currentStaticBall) {
+            if (xPos > this.app.screen.width / 2 + this.width / 2 - currentStaticBall.width / 2)
+                xPos = this.app.screen.width / 2 + this.width / 2 - currentStaticBall.width / 2
+
+            if (xPos < this.app.screen.width / 2 - this.width / 2 + currentStaticBall.width / 2) {
+                xPos = this.app.screen.width / 2 - this.width / 2 + currentStaticBall.width / 2
+            }
+        }
+        return xPos
+    }
+
+    private async onMouseUp(xPos: number) {
+        if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
+
+        const currentStaticBall = this.gameManager.currentStaticBall.value
+
+        if (currentStaticBall) {
+            // this.limitMoveBall(xPos)
+            xPos = this.getClampPositionX(xPos)
+            await currentStaticBall.tweenPosition(xPos)
             currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
-            this.limitMoveBall(xPos)
             this.gameManager.changeStateBallView(undefined)
         } else {
             console.log('noting ball')
