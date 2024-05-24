@@ -1,6 +1,6 @@
 import { GameScene } from './scripts/Scenes/GameScene'
-import { Application,Assets} from 'pixi.js'
-import {  Engine, Render, Runner } from 'matter-js'
+import { Application, Assets } from 'pixi.js'
+import { Engine, Render, Runner } from 'matter-js'
 import { timer } from 'rxjs'
 import Matter from 'matter-js'
 
@@ -15,7 +15,7 @@ const bootstrap = async () => {
         backgroundColor,
     })
 
-    await preload();
+    await preload()
 
     var container = document.getElementById('container')
 
@@ -80,12 +80,14 @@ const bootstrap = async () => {
     }
 }
 
-async function preload(){
-    await Assets.addBundle('uiSprite',{
-        start:'src/sprites/Start.png',
-        gameOver:'src/sprites/GameOver.png',
-        restart:'src/sprites/restart.png',
-    });
+async function preload() {
+    await Assets.addBundle('uiSprite', {
+        start: 'src/sprites/Start.png',
+        gameOver: 'src/sprites/GameOver.png',
+        restart: 'src/sprites/restart.png',
+    })
+
+    await Assets.add({ alias: 'pixelFont', src: 'assets/font/Pixelpoint.ttf' })
 }
 
 bootstrap()
