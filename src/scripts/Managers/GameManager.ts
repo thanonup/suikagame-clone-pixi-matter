@@ -12,6 +12,7 @@ export class GameManager {
     public engine: Matter.Engine
     public currentStaticBall: BehaviorSubject<BallTypeView> = new BehaviorSubject<BallTypeView>(undefined)
     public elements: BallTypeView[] = []
+    public score: BehaviorSubject<number> = new BehaviorSubject<number>(0)
 
     public originalScreen: { width: number; height: number }
 
@@ -41,5 +42,10 @@ export class GameManager {
 
     public findSpriteWithRigidbody(rb: Matter.Body): BallTypeView {
         return this.elements.find((element) => element.getBody() === rb)
+    }
+
+    public increaseScore(num: number) {
+        let score = this.score.value + num
+        this.score.next(score)
     }
 }

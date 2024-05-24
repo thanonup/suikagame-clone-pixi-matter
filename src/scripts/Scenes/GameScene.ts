@@ -1,4 +1,3 @@
-import { Application, Assets, Container, Graphics, Loader, Renderer, Sprite } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { BallTypeView } from '../Components/BallTypeView'
 import { Bodies, Composite } from 'matter-js'
@@ -7,28 +6,40 @@ import Matter from 'matter-js'
 import { GameController } from '../Components/GameController'
 import { Subscription, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
+import { GameplayState } from '../Enum/GameplayState'
+import { RestartButtonView } from '../UI/RestartButtonView'
+import * as PIXI from 'pixi.js'
+import { gsap } from 'gsap'
+import { PixiPlugin } from 'gsap/PixiPlugin'
+import { GameScoreView } from '../UI/GameScoreView'
 
-export class GameScene extends Container {
+gsap.registerPlugin(PixiPlugin)
+PixiPlugin.registerPIXI(PIXI)
+
+export class GameScene extends PIXI.Container {
     public static readonly GAME_CONTROLLER_WIDTH: number = 350
     public static readonly GAME_CONTROLLER_HEIGHT: number = 637
 
     private gameManager: GameManager
-    private app: Application
+    private app: PIXI.Application
     private engine: Matter.Engine
     private gameplayPod: GameplayPod
 
-    private floorGraphic: Graphics
+    private floorGraphic: PIXI.Graphics
     private groundBody: Matter.Body
     private wallLeftBody: Matter.Body
     private wallRightBody: Matter.Body
+    private gameOverBody: Matter.Body
 
     private ball: BallTypeView
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
     private gameController: GameController
+    private restartButtonView: RestartButtonView
+    private gameScoreView: GameScoreView
 
-    constructor(app: Application, engine: Matter.Engine) {
+    constructor(app: PIXI.Application, engine: Matter.Engine) {
         super()
 
         this.gameManager = GameManager.instance
@@ -46,13 +57,14 @@ export class GameScene extends Container {
 
     public async doInit() {
         await this.gameplayPod.loadData()
+        this.SubscribeSetup()
 
         this.gameController = new GameController()
         this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)
         this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
         this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
 
-        this.floorGraphic = new Graphics()
+        this.floorGraphic = new PIXI.Graphics()
         this.floorGraphic
             .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH, 20)
             .fill(0xffffff)
@@ -97,8 +109,34 @@ export class GameScene extends Container {
             }
         )
 
-        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
+        this.gameOverBody = Bodies.rectangle(
+            this.app.screen.width / 2,
+            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height)/2 ,
+            this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2 + 75,
+            this.floorGraphic.width,
+            this.floorGraphic.height,
+            {
+                label: 'gemeOverBody',
+                isStatic: true,
+                isSensor: true,
+            }
+        )
+        // this.gameOverBody.render.visible = false;
+        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody, this.gameOverBody])
 
+        console.log('------All Bodies-------')
+        console.log(Composite.allBodies(this.engine.world))
+
+        this.on('removed', () => {
+            this.onDestroy()
+        })
+
+        this.restartButtonView = new RestartButtonView()
+        this.restartButtonView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+        this.gameScoreView = new GameScoreView()
+    }
+
+    private ballSpawnAndSetting() {
         this.ball = new BallTypeView()
         this.ball.position.set(
             this.app.screen.width / 2,
@@ -123,13 +161,6 @@ export class GameScene extends Container {
                 })
             }
         })
-
-        console.log('------All Bodies-------')
-        console.log(Composite.allBodies(this.engine.world))
-
-        this.on('removed', () => {
-            this.onDestroy()
-        })
     }
 
     private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {
@@ -142,6 +173,15 @@ export class GameScene extends Container {
 
     private doOnTrigger(collision: Matter.Pair) {
         let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
+
+        let bodys = [collision.bodyA, collision.bodyB]
+        const ballBody = bodys.find((x) => x.label == 'Ball')
+        const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
+
+        if (ballBody != undefined && gameOverBody != undefined) {
+            const element = this.gameManager.findSpriteWithRigidbody(ballBody)
+            // console.log('gameOver')
+        }
 
         if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
             const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
@@ -161,6 +201,7 @@ export class GameScene extends Container {
                             ballBPod.ballStateType.value == BallStateType.IdleFromStatic)
                     ) {
                         this.removeElement(elementA)
+                        this.gameManager.increaseScore(ballAPod.currentBallBean.value.score)
 
                         if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
                             ballBPod.currentIndex++
@@ -232,6 +273,20 @@ export class GameScene extends Container {
         })
 
         this.gameManager.originalScreen = { width: this.app.screen.width, height: this.app.screen.height }
+    }
+
+    private SubscribeSetup() {
+        this.gameplayPod.gameplayState.subscribe((state) => {
+            switch (state) {
+                case GameplayState.GameplayState: {
+                    this.gameManager.elements.forEach((x) => this.removeElement(x))
+                    this.ballSpawnAndSetting()
+                    break
+                }
+                case GameplayState.EndState:
+                    break
+            }
+        })
     }
 
     public onDestroy() {
