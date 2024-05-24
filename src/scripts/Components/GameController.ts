@@ -79,7 +79,7 @@ export class GameController extends Graphics {
 
         const currentStaticBall = this.gameManager.currentStaticBall.value
         if (currentStaticBall) {
-            currentStaticBall.getPod().changeBallState(BallStateType.Idle)
+            currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
             this.limitMoveBall(xPos)
             this.gameManager.changeStateBallView(undefined)
         } else {

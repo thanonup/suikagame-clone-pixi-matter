@@ -49,7 +49,9 @@ export class GameScene extends PIXI.Container {
         this.engine = this.gameManager.engine
         this.gameplayPod = this.gameManager.gameplayPod
 
-        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollision(event))
+        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollisionEnter(event))
+        Matter.Events.on(this.engine, 'collisionActive', (event) => this.onCollisionStay(event))
+
         app.stage.hitArea = app.screen
     }
 
@@ -153,7 +155,7 @@ export class GameScene extends PIXI.Container {
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
 
-                    const randIndex = 0 //this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)
+                    const randIndex = this.randomIntFromInterval(0, 3)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
                     this.gameManager.elements.push(this.ball)
                 })
@@ -161,45 +163,59 @@ export class GameScene extends PIXI.Container {
         })
     }
 
-    private onCollision(event: Matter.IEventCollision<Matter.Engine>) {
-        event.pairs.forEach((collision) => {
-            let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
-            let bodys = [collision.bodyA, collision.bodyB]
-            const ballBody = bodys.find((x) => x.label == 'Ball')
-            const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
+    private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {
+        event.pairs.forEach((collision) => this.doOnTrigger(collision))
+    }
 
-            if (ballBody != undefined && gameOverBody != undefined) {
-                const element = this.gameManager.findSpriteWithRigidbody(ballBody)
-                console.log('gameOver')
-            }
+    private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
+        event.pairs.forEach((collision) => this.doOnTrigger(collision))
+    }
 
-            if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
-                const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
-                const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+    private doOnTrigger(collision: Matter.Pair) {
+        let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
 
-                if (elementA && elementB) {
-                    const ballAPod = elementA.getPod()
-                    const ballBPod = elementB.getPod()
+        let bodys = [collision.bodyA, collision.bodyB]
+        const ballBody = bodys.find((x) => x.label == 'Ball')
+        const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
 
-                    if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
-                        if (
-                            ballAPod.ballStateType.value == BallStateType.Idle &&
-                            ballBPod.ballStateType.value == BallStateType.Idle
-                        ) {
-                            this.removeElement(elementA)
-                            this.gameManager.increaseScore(ballBPod.currentBallBean.value.score)
+        if (ballBody != undefined && gameOverBody != undefined) {
+            const element = this.gameManager.findSpriteWithRigidbody(ballBody)
+            // console.log('gameOver')
+        }
 
-                            if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1)
-                                ballBPod.currentIndex++
+        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
+            const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
+            const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+
+            if (elementA && elementB) {
+                const ballAPod = elementA.getPod()
+                const ballBPod = elementB.getPod()
+
+                if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
+                    if (
+                        (ballAPod.ballStateType.value == BallStateType.Idle &&
+                            ballBPod.ballStateType.value == BallStateType.Idle) ||
+                        (ballAPod.ballStateType.value == BallStateType.IdleFromStatic &&
+                            ballBPod.ballStateType.value == BallStateType.Idle) ||
+                        (ballAPod.ballStateType.value == BallStateType.Idle &&
+                            ballBPod.ballStateType.value == BallStateType.IdleFromStatic)
+                    ) {
+                        this.removeElement(elementA)
+                        this.gameManager.increaseScore(ballAPod.currentBallBean.value.score)
+
+                        if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
+                            ballBPod.currentIndex++
 
                             ballBPod.changeCurrentBallBean(
                                 this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex]
                             )
+                        } else {
+                            this.removeElement(elementB)
                         }
                     }
                 }
             }
-        })
+        }
     }
 
     removeElement(element: BallTypeView) {
