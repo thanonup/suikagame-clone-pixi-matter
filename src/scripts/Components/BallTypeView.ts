@@ -89,16 +89,17 @@ export class BallTypeView extends Container {
                     restitution: 0.2,
                     isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
                     angle: 4.7,
+                    mass: bean.mass,
                 }
             )
+
+            console.log('Mass : ' + this.rigidBody.mass)
 
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {
                 Composite.remove(this.engine.world, [oldBody])
             }
-
-            //  if (this.pod.ballStateType.value != BallStateType.Static) this.pod.changeBallState(BallStateType.Idle)
         })
     }
 

@@ -4,55 +4,63 @@
         "ballType": "Pink",
         "score": 10,
         "size": 10,
-        "colorCode": "#FF69B4"
+        "colorCode": "#FF69B4",
+        "mass": 1
     },
     {
         "name": "Red",
         "ballType": "Red",
         "score": 15,
         "size": 20,
-        "colorCode": "#CD5C5C"
+        "colorCode": "#CD5C5C",
+        "mass": 4
     },
     {
         "name": "Purple",
         "ballType": "Purple",
         "score": 20,
         "size": 25,
-        "colorCode": "#BA55D3"
+        "colorCode": "#BA55D3",
+        "mass": 8
     },
     {
         "name": "Orange",
         "ballType": "Orange",
         "score": 25,
         "size": 30,
-        "colorCode": "#FFA07A"
+        "colorCode": "#FFA07A",
+        "mass": 12
     },
     {
         "name": "OrangeRed",
         "ballType": "OrangeRed",
         "score": 30,
         "size": 35,
-        "colorCode": "#FF4500"
+        "colorCode": "#FF4500",
+        "mass": 16
     },
     {
         "name": "Yellow",
         "ballType": "Yellow",
         "score": 35,
         "size": 45,
-        "colorCode": "#FFD700"
+        "colorCode": "#FFD700",
+        "mass": 24
     },
     {
         "name": "Green",
         "ballType": "Green",
         "score": 40,
         "size": 55,
-        "colorCode": "#32CD32"
+        "colorCode": "#32CD32",
+        "mass": 32
     },
     {
         "name": "DarkGreen",
         "ballType": "DarkGreen",
         "score": 40,
         "size": 60,
-        "colorCode": "#006400"
+        "colorCode": "#006400",
+        "mass": 40
     }
 ]
