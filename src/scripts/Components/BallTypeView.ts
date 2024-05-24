@@ -1,4 +1,4 @@
-import { Application, Container, Graphics } from 'pixi.js'
+import { Application, Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { Bodies, Composite } from 'matter-js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
@@ -10,11 +10,12 @@ import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 
 export class BallTypeView extends Container {
+    private app: Application
     private scene: Container
     private gameplayPod: GameplayPod
     private engine: Matter.Engine
 
-    private circle: Graphics
+    private circle: Sprite
     private rigidBody: Matter.Body
 
     private diposeSubscription: Subscription
@@ -28,6 +29,7 @@ export class BallTypeView extends Container {
         super()
         this.gameManager = GameManager.instance
 
+        this.app = this.gameManager.app
         this.scene = this.gameManager.currentScene
         this.gameplayPod = this.gameManager.gameplayPod
         this.engine = this.gameManager.engine
@@ -39,8 +41,10 @@ export class BallTypeView extends Container {
         this.pod = new BallTypePod(bean)
         this.pod.currentIndex = index
 
-        this.circle = new Graphics()
-        this.circle.circle(0, 0, bean.size).fill(0xffffff)
+        //  this.image = Sprite.from('myTexture.png')
+        this.circle = Sprite.from(bean.assetKey)
+        this.circle.anchor.set(0.5)
+        //  this.circle.circle(0, 0, bean.size) //.fill(0xffffff)
 
         this.addChild(this.circle)
 
@@ -74,8 +78,8 @@ export class BallTypeView extends Container {
         })
 
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
-            this.circle.tint = bean.colorCode
-            this.circle.setSize(bean.size * 2)
+            this.circle.texture = Texture.from(bean.assetKey)
+            this.circle.setSize(bean.size * 2.5)
 
             const oldBody = this.rigidBody
 
@@ -88,7 +92,7 @@ export class BallTypeView extends Container {
                     label: 'Ball',
                     restitution: 0.2,
                     isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
-                    angle: 4.7,
+                    // angle: 4.7,
                     mass: bean.mass,
                 }
             )

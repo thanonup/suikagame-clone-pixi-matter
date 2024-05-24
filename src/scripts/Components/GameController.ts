@@ -22,7 +22,7 @@ export class GameController extends Graphics {
     }
 
     public doInit(width: number, height: number) {
-        this.rect(0, 0, width, height).fill(0xff0000).alpha = 0.2
+        this.rect(0, 0, width, height).fill(0xff0000).alpha = 0.01
 
         this.eventMode = 'static'
         this.cursor = 'pointer'
@@ -73,9 +73,7 @@ export class GameController extends Graphics {
     }
 
     private onMouseUp(xPos: number) {
-
-        if(this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState)
-            return;
+        if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
 
         const currentStaticBall = this.gameManager.currentStaticBall.value
         if (currentStaticBall) {

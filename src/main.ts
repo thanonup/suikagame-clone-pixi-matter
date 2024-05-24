@@ -87,6 +87,21 @@ async function preload() {
         restart: 'src/sprites/restart.png',
     })
 
+    await Assets.addBundle('gameAssets', {
+        chick: '/assets/game-assets/chick.png',
+        cow: '/assets/game-assets/cow.png',
+        deer: '/assets/game-assets/deer.png',
+        dragon: '/assets/game-assets/dragon.png',
+        goat: '/assets/game-assets/goat.png',
+        monkey: '/assets/game-assets/monkey.png',
+        pig: '/assets/game-assets/pig.png',
+        rabbit: '/assets/game-assets/rabbit.png',
+        rat: '/assets/game-assets/rat.png',
+        tiger: '/assets/game-assets/tiger.png',
+        turtle: '/assets/game-assets/turtle.png',
+        wolf: '/assets/game-assets/wolf.png',
+    })
+
     await Assets.add({ alias: 'pixelFont', src: 'assets/font/Pixelpoint.ttf' })
 }
 
