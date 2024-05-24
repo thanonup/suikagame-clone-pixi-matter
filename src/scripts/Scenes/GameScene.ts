@@ -38,7 +38,9 @@ export class GameScene extends Container {
         this.engine = this.gameManager.engine
         this.gameplayPod = this.gameManager.gameplayPod
 
-        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollision(event))
+        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollisionEnter(event))
+        Matter.Events.on(this.engine, 'collisionActive', (event) => this.onCollisionStay(event))
+
         app.stage.hitArea = app.screen
     }
 
@@ -115,7 +117,7 @@ export class GameScene extends Container {
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
 
-                    const randIndex = 0 //this.randomIntFromInterval(0, this.gameManager.gameplayPod.ballBeans.length - 1)
+                    const randIndex = this.randomIntFromInterval(0, 3)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
                     this.gameManager.elements.push(this.ball)
                 })
@@ -130,36 +132,49 @@ export class GameScene extends Container {
         })
     }
 
-    private onCollision(event: Matter.IEventCollision<Matter.Engine>) {
-        event.pairs.forEach((collision) => {
-            let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
+    private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {
+        event.pairs.forEach((collision) => this.doOnTrigger(collision))
+    }
 
-            if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
-                const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
-                const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+    private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
+        event.pairs.forEach((collision) => this.doOnTrigger(collision))
+    }
 
-                if (elementA && elementB) {
-                    const ballAPod = elementA.getPod()
-                    const ballBPod = elementB.getPod()
+    private doOnTrigger(collision: Matter.Pair) {
+        let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
 
-                    if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
-                        if (
-                            ballAPod.ballStateType.value == BallStateType.Idle &&
-                            ballBPod.ballStateType.value == BallStateType.Idle
-                        ) {
-                            this.removeElement(elementA)
+        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
+            const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
+            const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
 
-                            if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1)
-                                ballBPod.currentIndex++
+            if (elementA && elementB) {
+                const ballAPod = elementA.getPod()
+                const ballBPod = elementB.getPod()
+
+                if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
+                    if (
+                        (ballAPod.ballStateType.value == BallStateType.Idle &&
+                            ballBPod.ballStateType.value == BallStateType.Idle) ||
+                        (ballAPod.ballStateType.value == BallStateType.IdleFromStatic &&
+                            ballBPod.ballStateType.value == BallStateType.Idle) ||
+                        (ballAPod.ballStateType.value == BallStateType.Idle &&
+                            ballBPod.ballStateType.value == BallStateType.IdleFromStatic)
+                    ) {
+                        this.removeElement(elementA)
+
+                        if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
+                            ballBPod.currentIndex++
 
                             ballBPod.changeCurrentBallBean(
                                 this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex]
                             )
+                        } else {
+                            this.removeElement(elementB)
                         }
                     }
                 }
             }
-        })
+        }
     }
 
     removeElement(element: BallTypeView) {

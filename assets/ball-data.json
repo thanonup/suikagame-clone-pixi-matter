@@ -17,14 +17,42 @@
         "name": "Purple",
         "ballType": "Purple",
         "score": 20,
-        "size": 30,
+        "size": 25,
         "colorCode": "#BA55D3"
     },
     {
         "name": "Orange",
         "ballType": "Orange",
         "score": 25,
-        "size": 40,
+        "size": 30,
         "colorCode": "#FFA07A"
+    },
+    {
+        "name": "OrangeRed",
+        "ballType": "OrangeRed",
+        "score": 30,
+        "size": 35,
+        "colorCode": "#FF4500"
+    },
+    {
+        "name": "Yellow",
+        "ballType": "Yellow",
+        "score": 35,
+        "size": 45,
+        "colorCode": "#FFD700"
+    },
+    {
+        "name": "Green",
+        "ballType": "Green",
+        "score": 40,
+        "size": 55,
+        "colorCode": "#32CD32"
+    },
+    {
+        "name": "DarkGreen",
+        "ballType": "DarkGreen",
+        "score": 40,
+        "size": 60,
+        "colorCode": "#006400"
     }
 ]

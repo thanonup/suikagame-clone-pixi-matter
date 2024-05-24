@@ -53,19 +53,27 @@ export class BallTypeView extends Container {
                 case BallStateType.Static:
                     this.gameManager.changeStateBallView(this)
                     break
+                case BallStateType.IdleFromStatic:
+                    this.freezeBall(false)
+                    this.delaySubscription?.unsubscribe()
+                    this.delaySubscription = timer(500).subscribe((_) => {
+                        this.pod.changeBallState(BallStateType.Idle)
+                    })
+                    break
                 case BallStateType.Idle:
+                    this.delaySubscription?.unsubscribe()
                     this.freezeBall(false)
                     break
                 case BallStateType.Merge:
-                    // this.delaySubscription = timer(1500).subscribe((_) => {
-                    //
-                    // })
+                    this.delaySubscription?.unsubscribe()
+                    this.delaySubscription = timer(500).subscribe((_) => {
+                        this.pod.changeBallState(BallStateType.Idle)
+                    })
                     break
             }
         })
 
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
-            console.log(bean.colorCode)
             this.circle.tint = bean.colorCode
             this.circle.setSize(bean.size * 2)
 
@@ -90,7 +98,7 @@ export class BallTypeView extends Container {
                 Composite.remove(this.engine.world, [oldBody])
             }
 
-            if (this.pod.ballStateType.value != BallStateType.Static) this.pod.changeBallState(BallStateType.Idle)
+            //  if (this.pod.ballStateType.value != BallStateType.Static) this.pod.changeBallState(BallStateType.Idle)
         })
     }
 
