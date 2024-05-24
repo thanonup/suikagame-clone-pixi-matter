@@ -1,0 +1,113 @@
+[
+    {
+        "name": "turtle",
+        "ballType": "Turtle",
+        "score": 10,
+        "size": 20,
+        "colorCode": "#FF69B4",
+        "mass": 1,
+        "assetKey": "turtle"
+    },
+    {
+        "name": "rabbit",
+        "ballType": "Rabbit",
+        "score": 15,
+        "size": 25,
+        "colorCode": "#CD5C5C",
+        "mass": 4,
+        "assetKey": "rabbit"
+    },
+    {
+        "name": "wolf",
+        "ballType": "Wolf",
+        "score": 20,
+        "size": 35,
+        "colorCode": "#BA55D3",
+        "mass": 8,
+        "assetKey": "wolf"
+    },
+    {
+        "name": "pig",
+        "ballType": "Pig",
+        "score": 25,
+        "size": 40,
+        "colorCode": "#FFA07A",
+        "mass": 12,
+        "assetKey": "pig"
+    },
+    {
+        "name": "goat",
+        "ballType": "Goat",
+        "score": 30,
+        "size": 50,
+        "colorCode": "#FF4500",
+        "mass": 16,
+        "assetKey": "goat"
+    },
+    {
+        "name": "cow",
+        "ballType": "Cow",
+        "score": 35,
+        "size": 55,
+        "colorCode": "#FFD700",
+        "mass": 24,
+        "assetKey": "cow"
+    },
+    {
+        "name": "monkey",
+        "ballType": "Monkey",
+        "score": 40,
+        "size": 65,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "monkey"
+    },
+    {
+        "name": "deer",
+        "ballType": "Deer",
+        "score": 40,
+        "size": 70,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "deer"
+    },
+
+    {
+        "name": "rat",
+        "ballType": "Rat",
+        "score": 40,
+        "size": 80,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "rat"
+    },
+
+    {
+        "name": "tiger",
+        "ballType": "Tiger",
+        "score": 40,
+        "size": 85,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "tiger"
+    },
+
+    {
+        "name": "dragon",
+        "ballType": "Dragon",
+        "score": 40,
+        "size": 90,
+        "colorCode": "#006400",
+        "mass": 40,
+        "assetKey": "dragon"
+    },
+    {
+        "name": "chick",
+        "ballType": "Chick",
+        "score": 40,
+        "size": 110,
+        "colorCode": "#006400",
+        "mass": 40,
+        "assetKey": "chick"
+    }
+]

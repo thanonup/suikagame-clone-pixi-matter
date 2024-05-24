@@ -6,4 +6,6 @@ export class BallBean {
     public size: number
     public score: number
     public colorCode: string
+    public mass: number
+    public assetKey: string
 }

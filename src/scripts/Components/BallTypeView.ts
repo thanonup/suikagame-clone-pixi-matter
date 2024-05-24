@@ -1,4 +1,4 @@
-import { Container, Graphics, Ticker } from 'pixi.js'
+import { Container, Sprite, Texture, Ticker } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { Bodies, Composite } from 'matter-js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
@@ -15,7 +15,7 @@ export class BallTypeView extends Container {
     private gameplayPod: GameplayPod
     private engine: Matter.Engine
 
-    private circle: Graphics
+    private circle: Sprite
     private rigidBody: Matter.Body
 
     private diposeSubscription: Subscription
@@ -29,6 +29,7 @@ export class BallTypeView extends Container {
     constructor() {
         super()
         this.gameManager = GameManager.instance
+
         this.scene = this.gameManager.currentScene
         this.gameplayPod = this.gameManager.gameplayPod
         this.engine = this.gameManager.engine
@@ -40,8 +41,10 @@ export class BallTypeView extends Container {
         this.pod = new BallTypePod(bean)
         this.pod.currentIndex = index
 
-        this.circle = new Graphics()
-        this.circle.circle(0, 0, bean.size).fill(0xffffff)
+        //  this.image = Sprite.from('myTexture.png')
+        this.circle = Sprite.from(bean.assetKey)
+        this.circle.anchor.set(0.5)
+        //  this.circle.circle(0, 0, bean.size) //.fill(0xffffff)
 
         this.addChild(this.circle)
 
@@ -58,8 +61,8 @@ export class BallTypeView extends Container {
 
     private setSubscription() {
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
-            this.circle.tint = bean.colorCode
-            this.circle.setSize(bean.size * 2)
+            this.circle.texture = Texture.from(bean.assetKey)
+            this.circle.setSize(bean.size * 2.5)
 
             const oldBody = this.rigidBody
 
@@ -72,17 +75,18 @@ export class BallTypeView extends Container {
                     label: 'Ball',
                     restitution: 0.2,
                     isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
-                    angle: 4.7,
-                    mass: bean.score,
+                    // angle: 4.7,
+                    mass: bean.mass,
                 }
             )
+
+            console.log('Mass : ' + this.rigidBody.mass)
+
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {
                 Composite.remove(this.engine.world, [oldBody])
             }
-
-            //  if (this.pod.ballStateType.value != BallStateType.Static) this.pod.changeBallState(BallStateType.Idle)
         })
 
         this.diposeSubscription = this.pod.ballStateType.subscribe((x) => {

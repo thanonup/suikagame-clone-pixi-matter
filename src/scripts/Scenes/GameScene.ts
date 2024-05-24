@@ -12,6 +12,7 @@ import * as PIXI from 'pixi.js'
 import { gsap } from 'gsap'
 import { PixiPlugin } from 'gsap/PixiPlugin'
 import { GameScoreView } from '../UI/GameScoreView'
+import { Assets } from 'pixi.js'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -59,6 +60,8 @@ export class GameScene extends PIXI.Container {
 
     public async doInit() {
         await this.gameplayPod.loadData()
+        await Assets.loadBundle('gameAssets')
+
         this.SubscribeSetup()
 
         this.gameController = new GameController()
@@ -163,7 +166,7 @@ export class GameScene extends PIXI.Container {
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
 
-                    const randIndex = this.randomIntFromInterval(0, 3)
+                    const randIndex = this.randomIntFromInterval(0, 5)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
                     this.gameManager.elements.push(this.ball)
                 })
