@@ -46,10 +46,8 @@ export class BallTypeView extends Container {
         this.pod = new BallTypePod(bean)
         this.pod.currentIndex = index
 
-        //  this.image = Sprite.from('myTexture.png')
         this.circle = Sprite.from(bean.assetKey)
         this.circle.anchor.set(0.5)
-        //  this.circle.circle(0, 0, bean.size) //.fill(0xffffff)
 
         this.addChild(this.circle)
 
@@ -70,7 +68,7 @@ export class BallTypeView extends Container {
     private setSubscription() {
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
             this.circle.texture = Texture.from(bean.assetKey)
-            this.circle.setSize(bean.size * 2.5)
+            this.circle.setSize(bean.size * 2)
 
             const oldBody = this.rigidBody
 

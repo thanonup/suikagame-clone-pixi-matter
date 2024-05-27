@@ -5,6 +5,8 @@ import { BehaviorSubject } from 'rxjs'
 
 export class GameplayPod {
     public ballBeans: BallBean[] = []
+    public availableIndexSpawnBall: number = 0
+    public maxAvailableIndexSpawnBall: number = 5
     public gameplayState: BehaviorSubject<GameplayState> = new BehaviorSubject<GameplayState>(
         GameplayState.GameplayState
     )
@@ -19,5 +21,9 @@ export class GameplayPod {
 
     public setGameplayState(state: GameplayState) {
         this.gameplayState.next(state)
+    }
+
+    public restartGame() {
+        this.availableIndexSpawnBall = 0
     }
 }
