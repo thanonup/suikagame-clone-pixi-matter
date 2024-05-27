@@ -87,6 +87,7 @@ export class GameController extends Graphics {
 
     private async onMouseUp(xPos: number) {
         if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
+
         const currentStaticBall = this.gameManager.currentStaticBall.value
 
         if (currentStaticBall) {
