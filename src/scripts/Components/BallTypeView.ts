@@ -1,4 +1,4 @@
-import { Application, Assets, Container, Graphics, Sprite, Texture } from 'pixi.js'
+import { Container, Sprite, Texture, Ticker } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { Bodies, Composite } from 'matter-js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
@@ -6,8 +6,9 @@ import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { BallTypePod } from './Pod/BallTypePod'
 import { BallBean } from '../Beans/BallBean'
-import { Subscription, timer } from 'rxjs'
+import { Subscription, interval, takeWhile, timer } from 'rxjs'
 import Matter from 'matter-js'
+import { gsap } from 'gsap'
 
 export class BallTypeView extends Container {
     private scene: Container
@@ -23,6 +24,7 @@ export class BallTypeView extends Container {
 
     private pod: BallTypePod
     private gameManager: GameManager
+    private ticker: Ticker
 
     constructor() {
         super()
@@ -45,34 +47,17 @@ export class BallTypeView extends Container {
         this.addChild(this.circle)
 
         this.setSubscription()
+        this.setupTricker()
+    }
+
+    private setupTricker() {
+        this.ticker = new Ticker()
+        this.ticker.add((time) => {
+            Matter.Body.setPosition(this.rigidBody, { x: this.position.x, y: this.position.y })
+        })
     }
 
     private setSubscription() {
-        this.diposeSubscription = this.pod.ballStateType.subscribe((x) => {
-            switch (x) {
-                case BallStateType.Static:
-                    this.gameManager.changeStateBallView(this)
-                    break
-                case BallStateType.IdleFromStatic:
-                    this.freezeBall(false)
-                    this.delaySubscription?.unsubscribe()
-                    this.delaySubscription = timer(500).subscribe((_) => {
-                        this.pod.changeBallState(BallStateType.Idle)
-                    })
-                    break
-                case BallStateType.Idle:
-                    this.delaySubscription?.unsubscribe()
-                    this.freezeBall(false)
-                    break
-                case BallStateType.Merge:
-                    this.delaySubscription?.unsubscribe()
-                    this.delaySubscription = timer(500).subscribe((_) => {
-                        this.pod.changeBallState(BallStateType.Idle)
-                    })
-                    break
-            }
-        })
-
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
             this.circle.texture = Texture.from(bean.assetKey)
             this.circle.setSize(bean.size * 2)
@@ -99,6 +84,31 @@ export class BallTypeView extends Container {
                 Composite.remove(this.engine.world, [oldBody])
             }
         })
+
+        this.diposeSubscription = this.pod.ballStateType.subscribe((x) => {
+            switch (x) {
+                case BallStateType.Static:
+                    this.gameManager.changeStateBallView(this)
+                    break
+                case BallStateType.IdleFromStatic:
+                    this.freezeBall(false)
+                    this.delaySubscription?.unsubscribe()
+                    this.delaySubscription = timer(500).subscribe((_) => {
+                        this.pod.changeBallState(BallStateType.Idle)
+                    })
+                    break
+                case BallStateType.Idle:
+                    this.delaySubscription?.unsubscribe()
+                    this.freezeBall(false)
+                    break
+                case BallStateType.Merge:
+                    this.delaySubscription?.unsubscribe()
+                    this.delaySubscription = timer(250).subscribe((_) => {
+                        this.pod.changeBallState(BallStateType.Idle)
+                    })
+                    break
+            }
+        })
     }
 
     public update() {
@@ -120,6 +130,14 @@ export class BallTypeView extends Container {
 
     public movePosition(xPos: number) {
         Matter.Body.setPosition(this.rigidBody, { x: xPos, y: this.rigidBody.position.y })
+    }
+
+    public async tweenPosition(xPos: number) {
+        console.log(xPos)
+        console.log(this.position.x)
+        this.position.set(xPos, this.rigidBody.position.y)
+        gsap.to(this, { x: xPos, duration: 0.3 }).then(() => this.ticker.stop())
+        this.ticker.start()
     }
 
     public onDestroy() {

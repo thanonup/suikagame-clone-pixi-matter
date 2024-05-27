@@ -101,8 +101,6 @@ async function preload() {
         turtle: '/assets/game-assets/turtle.png',
         wolf: '/assets/game-assets/wolf.png',
     })
-
-    await Assets.add({ alias: 'pixelFont', src: 'assets/font/Pixelpoint.ttf' })
 }
 
 bootstrap()
