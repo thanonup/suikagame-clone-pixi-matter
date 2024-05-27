@@ -10,7 +10,6 @@ import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 
 export class BallTypeView extends Container {
-    private app: Application
     private scene: Container
     private gameplayPod: GameplayPod
     private engine: Matter.Engine
@@ -29,7 +28,6 @@ export class BallTypeView extends Container {
         super()
         this.gameManager = GameManager.instance
 
-        this.app = this.gameManager.app
         this.scene = this.gameManager.currentScene
         this.gameplayPod = this.gameManager.gameplayPod
         this.engine = this.gameManager.engine
@@ -41,10 +39,8 @@ export class BallTypeView extends Container {
         this.pod = new BallTypePod(bean)
         this.pod.currentIndex = index
 
-        //  this.image = Sprite.from('myTexture.png')
         this.circle = Sprite.from(bean.assetKey)
         this.circle.anchor.set(0.5)
-        //  this.circle.circle(0, 0, bean.size) //.fill(0xffffff)
 
         this.addChild(this.circle)
 
@@ -79,7 +75,7 @@ export class BallTypeView extends Container {
 
         this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
             this.circle.texture = Texture.from(bean.assetKey)
-            this.circle.setSize(bean.size * 2.5)
+            this.circle.setSize(bean.size * 2)
 
             const oldBody = this.rigidBody
 
@@ -96,8 +92,6 @@ export class BallTypeView extends Container {
                     mass: bean.mass,
                 }
             )
-
-            console.log('Mass : ' + this.rigidBody.mass)
 
             Composite.add(this.engine.world, [this.rigidBody])
 
