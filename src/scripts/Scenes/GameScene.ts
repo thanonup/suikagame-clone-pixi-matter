@@ -163,7 +163,7 @@ export class GameScene extends PIXI.Container {
                         this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
                     )
 
-                    const randIndex = this.randomIntFromInterval(0, 5)
+                    const randIndex = this.randomIntFromInterval(0, this.gameplayPod.availableIndexSpawnBall)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
                     this.gameManager.elements.push(this.ball)
                 })
@@ -232,6 +232,14 @@ export class GameScene extends PIXI.Container {
                             ballBPod.changeCurrentBallBean(
                                 this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex]
                             )
+
+                            if (
+                                ballBPod.currentIndex > this.gameManager.gameplayPod.availableIndexSpawnBall &&
+                                this.gameManager.gameplayPod.availableIndexSpawnBall <
+                                    this.gameManager.gameplayPod.maxAvailableIndexSpawnBall
+                            ) {
+                                this.gameManager.gameplayPod.availableIndexSpawnBall = ballBPod.currentIndex
+                            }
                         } else {
                             this.removeElement(elementB)
                         }
@@ -308,6 +316,7 @@ export class GameScene extends PIXI.Container {
             switch (state) {
                 case GameplayState.GameplayState: {
                     this.gameManager.elements.forEach((x) => this.removeElement(x))
+                    this.gameplayPod.restartGame()
                     this.ballSpawnAndSetting()
                     break
                 }
