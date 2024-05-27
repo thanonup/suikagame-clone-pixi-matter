@@ -116,9 +116,7 @@ export class GameScene extends PIXI.Container {
 
         this.gameOverBody = Bodies.rectangle(
             this.app.screen.width / 2,
-            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2,
-            // this.app.screen.height / 2 - (this.gameController.height + this.floorGraphic.height) / 2 + 75,
-            this.floorGraphic.getBounds().y / 2 + 200,
+            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
 
             this.floorGraphic.width,
             this.floorGraphic.height,
@@ -158,8 +156,7 @@ export class GameScene extends PIXI.Container {
         this.disposeSpawner = this.gameManager.currentStaticBall.subscribe((ball) => {
             if (ball == undefined) {
                 this.ball = undefined
-                // this.disposeTimer = timer(1000).subscribe((_) => {
-                this.disposeTimer = timer(100).subscribe((_) => {
+                this.disposeTimer = timer(1000).subscribe((_) => {
                     this.ball = new BallTypeView()
                     this.ball.position.set(
                         this.app.screen.width / 2,
@@ -276,6 +273,11 @@ export class GameScene extends PIXI.Container {
         Matter.Body.setPosition(this.wallRightBody, {
             x: this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
             y: this.app.screen.height / 2 - this.floorGraphic.height / 2,
+        })
+
+        Matter.Body.setPosition(this.gameOverBody, {
+            x: this.app.screen.width / 2,
+            y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
         })
 
         if (this.ball != undefined) {
