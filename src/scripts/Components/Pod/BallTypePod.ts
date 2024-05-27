@@ -22,7 +22,7 @@ export class BallTypePod {
     }
 
     public changeCurrentBallBean(bean: BallBean) {
-        this.changeBallState(BallStateType.Merge)
         this.currentBallBean.next(bean)
+        this.changeBallState(BallStateType.Merge)
     }
 }

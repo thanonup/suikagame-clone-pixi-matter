@@ -3,11 +3,17 @@ import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
+import { Observable, Subscription, observable, timer } from 'rxjs'
 
 export class GameController extends Graphics {
     private app: Application
     private scene: Container
     private isClick: boolean = false
+
+    private movingTween: gsap.core.Tween
+
+    private isMouseMove: boolean = false
+    private mouseMoveTimer: Subscription
 
     private gameManager: GameManager
     constructor() {
@@ -33,9 +39,14 @@ export class GameController extends Graphics {
         })
         this.on('pointerdown', () => {
             this.isClick = true
+            this.mouseMoveTimer = timer(250).subscribe(() => {
+                this.isMouseMove = true
+            })
         })
 
         this.on('pointermove', (event) => {
+            if (!this.isMouseMove) return
+
             if (this.isClick) {
                 this.limitMoveBall(event.x)
             }
@@ -49,7 +60,10 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointermove', (event) => {
+            if (!this.isMouseMove) return
+
             if (this.isClick) {
+                this.movingTween?.kill()
                 this.limitMoveBall(event.x)
             }
         })
@@ -86,6 +100,8 @@ export class GameController extends Graphics {
     }
 
     private async onMouseUp(xPos: number) {
+        this.mouseMoveTimer?.unsubscribe()
+
         if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
 
         const currentStaticBall = this.gameManager.currentStaticBall.value
@@ -93,12 +109,21 @@ export class GameController extends Graphics {
         if (currentStaticBall) {
             // this.limitMoveBall(xPos)
             xPos = this.getClampPositionX(xPos)
-            await currentStaticBall.tweenPosition(xPos)
-            currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
-            this.gameManager.changeStateBallView(undefined)
+            if (!this.isMouseMove) {
+                this.movingTween = currentStaticBall.tweenPosition(xPos)
+                this.movingTween.then(() => {
+                    this.gameManager.changeStateBallView(undefined)
+                    currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                })
+            } else {
+                this.gameManager.changeStateBallView(undefined)
+                currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+            }
         } else {
             console.log('noting ball')
         }
+
+        this.isMouseMove = false
     }
 
     public resize() {

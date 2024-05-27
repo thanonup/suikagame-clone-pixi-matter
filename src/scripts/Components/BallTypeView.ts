@@ -1,4 +1,4 @@
-import { Container, Sprite, Texture, Ticker } from 'pixi.js'
+import { Container, ObservablePoint, Point, Sprite, Texture, Ticker } from 'pixi.js'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { Bodies, Composite } from 'matter-js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
@@ -6,7 +6,7 @@ import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { BallTypePod } from './Pod/BallTypePod'
 import { BallBean } from '../Beans/BallBean'
-import { Subscription, interval, takeWhile, timer } from 'rxjs'
+import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 import { gsap } from 'gsap'
 
@@ -24,7 +24,12 @@ export class BallTypeView extends Container {
 
     private pod: BallTypePod
     private gameManager: GameManager
-    private ticker: Ticker
+    public ticker: Ticker
+
+    private targetPosition: Container = new Container()
+    // private sub: gsap.core.Omit<gsap.core.Tween, 'then'>
+    private movingTween: gsap.core.Tween
+    private mergingTween: gsap.core.Tween
 
     constructor() {
         super()
@@ -49,13 +54,16 @@ export class BallTypeView extends Container {
         this.addChild(this.circle)
 
         this.setSubscription()
-        this.setupTricker()
+        this.setupTicker()
     }
 
-    private setupTricker() {
+    private setupTicker() {
         this.ticker = new Ticker()
-        this.ticker.add((time) => {
-            Matter.Body.setPosition(this.rigidBody, { x: this.position.x, y: this.position.y })
+        this.ticker.add(() => {
+            Matter.Body.setPosition(this.rigidBody, {
+                x: this.targetPosition.x,
+                y: this.targetPosition.y,
+            })
         })
     }
 
@@ -80,8 +88,6 @@ export class BallTypeView extends Container {
                 }
             )
 
-            console.log('Mass : ' + this.rigidBody.mass)
-
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {
@@ -105,12 +111,27 @@ export class BallTypeView extends Container {
                     this.delaySubscription?.unsubscribe()
                     this.freezeBall(false)
                     break
-                case BallStateType.Merge:
+                case BallStateType.Merge: {
+                    Matter.Body.scale(this.rigidBody, 0.25, 0.25)
+
+                    const originImageScale: number = this.circle.scale._x
+                    this.mergingTween = gsap.to(this, {
+                        duration: 0.2,
+                        onUpdate: (x) => {
+                            // console.log(this.circle.scale)
+                            let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
+                            let sizeMultipy = targetSize / this.rigidBody.circleRadius
+                            this.circle.scale = originImageScale * this.mergingTween.progress()
+                            Matter.Body.scale(this.rigidBody, sizeMultipy, sizeMultipy)
+                        },
+                    })
+
                     this.delaySubscription?.unsubscribe()
                     this.delaySubscription = timer(250).subscribe((_) => {
                         this.pod.changeBallState(BallStateType.Idle)
                     })
                     break
+                }
             }
         })
     }
@@ -136,12 +157,39 @@ export class BallTypeView extends Container {
         Matter.Body.setPosition(this.rigidBody, { x: xPos, y: this.rigidBody.position.y })
     }
 
-    public async tweenPosition(xPos: number) {
-        console.log(xPos)
-        console.log(this.position.x)
-        this.position.set(xPos, this.rigidBody.position.y)
-        gsap.to(this, { x: xPos, duration: 0.3 }).then(() => this.ticker.stop())
+    public tweenPosition(target: number | Point) {
+        this.targetPosition.position = this.rigidBody.position
         this.ticker.start()
+        this.movingTween?.kill()
+        let duration = 0.8
+        // if (typeof target === 'number') this.sub = await gsap.to(this.targetPosition, { x: target, duration: 0.3 })
+        // else this.sub = await gsap.to(this.targetPosition, { x: target.x, y: target.y, duration: 0.3 })
+
+        if (typeof target === 'number')
+            this.movingTween = gsap.to(this.targetPosition, {
+                x: target,
+                duration,
+                onComplete: () => {
+                    this.ticker.stop()
+                },
+                onInterrupt: () => {
+                    this.ticker.stop()
+                },
+            })
+        else
+            this.movingTween = gsap.to(this.targetPosition, {
+                x: target.x,
+                y: target.y,
+                duration,
+                onComplete: () => {
+                    this.ticker.stop()
+                },
+                onInterrupt: () => {
+                    this.ticker.stop()
+                },
+            })
+
+        return this.movingTween
     }
 
     public onDestroy() {
