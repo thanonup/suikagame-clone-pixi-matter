@@ -134,9 +134,6 @@ export class GameScene extends PIXI.Container {
     }
 
     private ballSpawnAndSetting() {
-        this.disposeSpawner?.unsubscribe()
-        this.disposeTimer?.unsubscribe()
-
         this.ball = new BallTypeView()
         this.ball.position.set(
             this.app.screen.width / 2,
@@ -174,9 +171,7 @@ export class GameScene extends PIXI.Container {
     private doOnTrigger(collision: Matter.Pair) {
         let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
 
-        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
-            this.OnMerge(bodyA, bodyB)
-        }
+        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') this.OnMerge(bodyA, bodyB)
     }
 
     private OnMerge(bodyA: Matter.Body, bodyB: Matter.Body) {
@@ -285,6 +280,8 @@ export class GameScene extends PIXI.Container {
 
     private SubscribeSetup() {
         this.gameplayPod.gameplayState.subscribe((state) => {
+            this.unSubscription()
+
             switch (state) {
                 case GameplayState.GameplayState: {
                     this.gameManager.elements.forEach((x) => this.removeElement(x))
@@ -294,16 +291,29 @@ export class GameScene extends PIXI.Container {
                     break
                 }
                 case GameplayState.GameOverState:
+                    if (this.gameManager.currentStaticBall.value != undefined)
+                        this.removeElement(this.gameManager.currentStaticBall.value)
+
                     let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
-                    interval(300)
+                    interval(100)
                         .pipe(take(elements.length))
                         .subscribe((index) => {
                             this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
                             this.removeElement(elements[index])
+                            if (index === elements.length - 1)
+                                this.gameplayPod.setGameplayState(GameplayState.ResetState)
                         })
                     break
             }
         })
+    }
+
+    private unSubscription() {
+        this.disposeSpawner?.unsubscribe()
+        this.disposeTimer?.unsubscribe()
+
+        this.disposeSpawner = undefined
+        this.disposeTimer = undefined
     }
 
     public onDestroy() {
