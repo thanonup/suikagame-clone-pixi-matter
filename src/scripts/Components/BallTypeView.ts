@@ -118,9 +118,9 @@ export class BallTypeView extends Container {
                         onUpdate: (x) => {
                             // console.log(this.circle.scale)
                             let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
-                            let sizeMultipy = targetSize / this.rigidBody.circleRadius
+                            let sizeMultiply = targetSize / this.rigidBody.circleRadius
                             this.circle.scale = originImageScale * this.mergingTween.progress()
-                            Matter.Body.scale(this.rigidBody, sizeMultipy, sizeMultipy)
+                            Matter.Body.scale(this.rigidBody, sizeMultiply, sizeMultiply)
                         },
                     })
 
@@ -159,7 +159,7 @@ export class BallTypeView extends Container {
         this.targetPosition.position = this.rigidBody.position
         this.ticker.start()
         this.movingTween?.kill()
-        let duration = 0.8
+        let duration = 0.4
         // if (typeof target === 'number') this.sub = await gsap.to(this.targetPosition, { x: target, duration: 0.3 })
         // else this.sub = await gsap.to(this.targetPosition, { x: target.x, y: target.y, duration: 0.3 })
 

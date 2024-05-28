@@ -4,7 +4,7 @@ import { Bodies, Composite } from 'matter-js'
 import { GameManager } from '../Managers/GameManager'
 import Matter from 'matter-js'
 import { GameController } from '../Components/GameController'
-import { Subscription, timer } from 'rxjs'
+import { Subscription, interval, take, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
 import { RestartButtonView } from '../UI/RestartButtonView'
@@ -13,6 +13,7 @@ import { gsap } from 'gsap'
 import { PixiPlugin } from 'gsap/PixiPlugin'
 import { GameScoreView } from '../UI/GameScoreView'
 import { Assets } from 'pixi.js'
+import { BallTypePod } from '../Components/Pod/BallTypePod'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -206,43 +207,56 @@ export class GameScene extends PIXI.Container {
     private doOnTrigger(collision: Matter.Pair) {
         let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
 
+        this.newMethod(bodyA, bodyB)
+    }
+
+    private newMethod(bodyA: Matter.Body, bodyB: Matter.Body) {
         if (bodyA.label == 'Ball' && bodyB.label == 'Ball') {
-            const elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
-            const elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+            this.OnMerge(bodyA, bodyB)
+        }
+    }
 
-            if (elementA && elementB) {
-                const ballAPod = elementA.getPod()
-                const ballBPod = elementB.getPod()
+    private OnMerge(bodyA: Matter.Body, bodyB: Matter.Body) {
+        let elementA
+        let elementB
+        if (bodyA.position.y < bodyA.position.y) {
+            elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
+            elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
+        } else {
+            elementA = this.gameManager.findSpriteWithRigidbody(bodyB)
+            elementB = this.gameManager.findSpriteWithRigidbody(bodyA)
+        }
 
-                if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
-                    if (
-                        (ballAPod.ballStateType.value == BallStateType.Idle &&
-                            ballBPod.ballStateType.value == BallStateType.Idle) ||
-                        (ballAPod.ballStateType.value == BallStateType.IdleFromStatic &&
-                            ballBPod.ballStateType.value == BallStateType.Idle) ||
-                        (ballAPod.ballStateType.value == BallStateType.Idle &&
-                            ballBPod.ballStateType.value == BallStateType.IdleFromStatic)
-                    ) {
-                        this.removeElement(elementA)
-                        this.gameManager.increaseScore(ballAPod.currentBallBean.value.score)
+        if (elementA && elementB) {
+            const ballAPod: BallTypePod = elementA.getPod()
+            const ballBPod: BallTypePod = elementB.getPod()
 
-                        if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
-                            ballBPod.currentIndex++
+            if (ballAPod.currentBallBean.value.ballType == ballBPod.currentBallBean.value.ballType) {
+                if (
+                    (ballAPod.ballStateType.value == BallStateType.Idle &&
+                        ballBPod.ballStateType.value == BallStateType.Idle) ||
+                    (ballAPod.ballStateType.value == BallStateType.IdleFromStatic &&
+                        ballBPod.ballStateType.value == BallStateType.Idle) ||
+                    (ballAPod.ballStateType.value == BallStateType.Idle &&
+                        ballBPod.ballStateType.value == BallStateType.IdleFromStatic)
+                ) {
+                    this.gameManager.increaseScore(ballAPod.currentBallBean.value.score)
+                    this.removeElement(elementA)
 
-                            ballBPod.changeCurrentBallBean(
-                                this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex]
-                            )
+                    if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
+                        ballBPod.currentIndex++
 
-                            if (
-                                ballBPod.currentIndex > this.gameManager.gameplayPod.availableIndexSpawnBall &&
-                                this.gameManager.gameplayPod.availableIndexSpawnBall <
-                                    this.gameManager.gameplayPod.maxAvailableIndexSpawnBall
-                            ) {
-                                this.gameManager.gameplayPod.availableIndexSpawnBall = ballBPod.currentIndex
-                            }
-                        } else {
-                            this.removeElement(elementB)
+                        ballBPod.changeCurrentBallBean(this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex])
+                        if (
+                            ballBPod.currentIndex > this.gameManager.gameplayPod.availableIndexSpawnBall &&
+                            this.gameManager.gameplayPod.availableIndexSpawnBall <
+                                this.gameManager.gameplayPod.maxAvailableIndexSpawnBall
+                        ) {
+                            this.gameManager.gameplayPod.availableIndexSpawnBall = ballBPod.currentIndex
                         }
+                    } else {
+                        this.gameManager.increaseScore(ballBPod.currentBallBean.value.score)
+                        this.removeElement(elementB)
                     }
                 }
             }
@@ -317,10 +331,18 @@ export class GameScene extends PIXI.Container {
                 case GameplayState.GameplayState: {
                     this.gameManager.elements.forEach((x) => this.removeElement(x))
                     this.gameplayPod.restartGame()
+                    this.gameManager.score.next(0)
                     this.ballSpawnAndSetting()
                     break
                 }
                 case GameplayState.GameOverState:
+                    let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
+                    interval(300)
+                        .pipe(take(elements.length))
+                        .subscribe((index) => {
+                            this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
+                            this.removeElement(elements[index])
+                        })
                     break
             }
         })

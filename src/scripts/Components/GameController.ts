@@ -111,8 +111,8 @@ export class GameController extends Graphics {
             xPos = this.getClampPositionX(xPos)
             if (!this.isMouseMove) {
                 this.movingTween = currentStaticBall.tweenPosition(xPos)
+                this.gameManager.changeStateBallView(undefined)
                 this.movingTween.then(() => {
-                    this.gameManager.changeStateBallView(undefined)
                     currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
                 })
             } else {

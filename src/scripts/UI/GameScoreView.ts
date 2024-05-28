@@ -32,7 +32,7 @@ export class GameScoreView extends Container {
 
     private setupSubScribe() {
         this.gameManager.score.subscribe((score) => {
-            if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
+            // if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
 
             const intervalTime = interval(50)
             this.tweeningScore?.unsubscribe()
