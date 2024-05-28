@@ -8,6 +8,7 @@ import Matter from 'matter-js'
 import { Subscription, timer } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
 import { BallStateType } from '../Types/BallStateType'
+import { gsap } from 'gsap'
 
 export class GameOverView extends Container {
     private app: Application
@@ -19,9 +20,13 @@ export class GameOverView extends Container {
     private lineGameover: Graphics
 
     private gameOverLineBody: Matter.Body
-    private gameOverCheckBody: Matter.Body
+    private gameOverAlertBody: Matter.Body
+
+    private alertStartTween: gsap.core.Tween
+    private alertTween: gsap.core.Tween
 
     private disposeGameOver: Subscription
+    private disposeGameOverAlert: Subscription
 
     constructor() {
         super()
@@ -52,15 +57,50 @@ export class GameOverView extends Container {
             }
         )
 
-        Composite.add(this.engine.world, [this.gameOverLineBody])
+        this.gameOverAlertBody = Bodies.rectangle(
+            this.app.screen.width / 2,
+            this.gameOverLineBody.position.y + height / 2 + 50,
+            width,
+            100,
+            {
+                label: 'gemeOverAlert',
+                isStatic: true,
+                isSensor: true,
+            }
+        )
+
+        Composite.add(this.engine.world, [this.gameOverLineBody, this.gameOverAlertBody])
 
         this.lineGameover = new Graphics()
         this.lineGameover
             .rect(this.gameOverLineBody.position.x, this.gameOverLineBody.position.y + height / 4, width, height / 2)
-            .fill(0xffffff)
+            .fill(0xff3050)
             .pivot.set(width / 2, height / 2)
+        this.lineGameover.visible = false
 
         this.addChild(this.lineGameover)
+    }
+
+    private setTweenLine() {
+        if (this.alertStartTween == undefined || null) {
+            this.alertStartTween = gsap.fromTo(
+                this.lineGameover,
+                { alpha: 0 },
+                {
+                    alpha: 1,
+                    duration: 0.25,
+                    onComplete: () => {
+                        if (this.alertTween == undefined || null) {
+                            this.alertTween = gsap.fromTo(
+                                this.lineGameover,
+                                { alpha: 1 },
+                                { alpha: 0.2, duration: 0.25, repeat: -1, yoyo: true, repeatDelay: 0.2 }
+                            )
+                        }
+                    },
+                }
+            )
+        }
     }
 
     private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {}
@@ -73,6 +113,47 @@ export class GameOverView extends Container {
         } else if (!this.isBallsIngameOverZone(event) && this.disposeGameOver != undefined) {
             this.disposeGameOver?.unsubscribe()
             this.disposeGameOver = undefined
+        }
+
+        this.checkBallsIngameOverAlertlZone(event)
+    }
+
+    private checkBallsIngameOverAlertlZone(event: Matter.IEventCollision<Matter.Engine>) {
+        let isBallsInZone = false
+        event.pairs.forEach((collision) => {
+            const bodys = [collision.bodyA, collision.bodyB]
+            const ballBody = bodys.find((x) => x.label == 'Ball')
+            const gameOverAlertlBody = bodys.find((x) => x.label == 'gemeOverAlert')
+
+            if (ballBody != undefined && gameOverAlertlBody != undefined) {
+                isBallsInZone = true
+            }
+        })
+
+        if (isBallsInZone) {
+            if (this.disposeGameOverAlert == undefined) {
+                this.disposeGameOverAlert = timer(1500).subscribe((_) => {
+                    this.lineGameover.visible = true
+                    this.setTweenLine()
+                })
+            }
+        } else {
+            if (this.disposeGameOverAlert != undefined) {
+                this.disposeGameOverAlert?.unsubscribe()
+                this.disposeGameOverAlert = undefined
+
+                this.lineGameover.visible = false
+                this.lineGameover.alpha = 0
+
+                this.alertStartTween?.kill()
+                this.alertTween?.kill()
+
+                this.alertStartTween = undefined
+                this.alertStartTween = null
+
+                this.alertTween = undefined
+                this.alertTween = null
+            }
         }
     }
 
@@ -100,5 +181,9 @@ export class GameOverView extends Container {
 
     public onDestroy() {
         this.disposeGameOver?.unsubscribe()
+        this.disposeGameOverAlert?.unsubscribe()
+
+        this.disposeGameOver = undefined
+        this.disposeGameOverAlert = undefined
     }
 }
