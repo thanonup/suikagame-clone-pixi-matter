@@ -15,6 +15,7 @@ import { GameScoreView } from '../UI/GameScoreView'
 import { Assets } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { Particle } from '@pixi/particle-emitter'
+import { GameOverView } from '../Components/GameOverView'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -32,17 +33,16 @@ export class GameScene extends PIXI.Container {
     private groundBody: Matter.Body
     private wallLeftBody: Matter.Body
     private wallRightBody: Matter.Body
-    private gameOverBody: Matter.Body
 
     private ball: BallTypeView
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
-    private disposeGameOver: Subscription
 
     private gameController: GameController
     private restartButtonView: RestartButtonView
     private gameScoreView: GameScoreView
+    private gameOverView: GameOverView
 
     constructor(app: PIXI.Application, engine: Matter.Engine) {
         super()
@@ -116,20 +116,11 @@ export class GameScene extends PIXI.Container {
             }
         )
 
-        this.gameOverBody = Bodies.rectangle(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
+        this.gameOverView = new GameOverView()
+        this.gameOverView.doInit(this.floorGraphic.width, this.floorGraphic.height)
 
-            this.floorGraphic.width,
-            this.floorGraphic.height,
-            {
-                label: 'gemeOverBody',
-                isStatic: true,
-                isSensor: true,
-            }
-        )
         // this.gameOverBody.render.visible = false;
-        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody, this.gameOverBody])
+        Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
@@ -176,30 +167,6 @@ export class GameScene extends PIXI.Container {
 
     private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
-
-        if (this.isBallsIngameOverZone(event) && this.disposeGameOver == undefined) {
-            this.disposeGameOver = timer(3000).subscribe((_) => {
-                this.gameManager.gameplayPod.setGameplayState(GameplayState.GameOverState)
-            })
-        } else if (!this.isBallsIngameOverZone(event) && this.disposeGameOver != undefined) {
-            this.disposeGameOver?.unsubscribe()
-            this.disposeGameOver = undefined
-        }
-    }
-
-    private isBallsIngameOverZone(event: Matter.IEventCollision<Matter.Engine>) {
-        let isBallsInZone = false
-        event.pairs.forEach((collision) => {
-            const bodys = [collision.bodyA, collision.bodyB]
-            const ballBody = bodys.find((x) => x.label == 'Ball')
-            const gameOverBody = bodys.find((x) => x.label == 'gemeOverBody')
-
-            if (gameOverBody != undefined && gameOverBody != undefined) {
-                const element = this.gameManager.findSpriteWithRigidbody(ballBody)
-                if (element?.getPod().ballStateType.value == BallStateType.Idle) isBallsInZone = true
-            }
-        })
-        return isBallsInZone
     }
 
     private doOnTrigger(collision: Matter.Pair) {
@@ -284,12 +251,6 @@ export class GameScene extends PIXI.Container {
             y: this.app.screen.height / 2 - this.floorGraphic.height / 2,
         })
 
-        Matter.Body.setPosition(this.gameOverBody, {
-            x: this.app.screen.width / 2,
-            y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
-            // y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 300,
-        })
-
         if (this.ball != undefined) {
             Matter.Body.setPosition(this.ball.getBody(), {
                 x: this.app.screen.width / 2,
@@ -344,11 +305,9 @@ export class GameScene extends PIXI.Container {
     }
 
     private unSubscription() {
-        this.disposeGameOver?.unsubscribe()
         this.disposeSpawner?.unsubscribe()
         this.disposeTimer?.unsubscribe()
 
-        this.disposeGameOver = undefined
         this.disposeSpawner = undefined
         this.disposeTimer = undefined
     }
