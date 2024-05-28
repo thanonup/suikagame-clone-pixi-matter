@@ -56,7 +56,7 @@ export class RestartButtonView extends Container {
 
     private setupSubscribe() {
         this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
-            if (state !== GameplayState.GameplayState) this.onOpen()
+            if (state === GameplayState.ResetState) this.onOpen()
         })
     }
 

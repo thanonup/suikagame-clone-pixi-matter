@@ -25,6 +25,13 @@ export class GameController extends Graphics {
 
         // console.log(this.scene)
         GameObjectConstructor(this.scene, this)
+        this.setupSubscribe()
+    }
+
+    private setupSubscribe() {
+        this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
+            this.movingTween?.kill()
+        })
     }
 
     public doInit(width: number, height: number) {
