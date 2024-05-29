@@ -34,6 +34,7 @@ export class GameScene extends PIXI.Container {
     private wallRightBody: Matter.Body
 
     private ball: BallTypeView
+    private ballPositionY: number
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
@@ -134,11 +135,11 @@ export class GameScene extends PIXI.Container {
     }
 
     private ballSpawnAndSetting() {
+        this.ballPositionY = this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 40
+
         this.ball = new BallTypeView()
-        this.ball.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
-        )
+        this.ball.position.set(this.app.screen.width / 2, this.ballPositionY)
+
         this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0], 0)
         this.gameManager.elements.push(this.ball)
 
@@ -147,10 +148,7 @@ export class GameScene extends PIXI.Container {
                 this.ball = undefined
                 this.disposeTimer = timer(1000).subscribe((_) => {
                     this.ball = new BallTypeView()
-                    this.ball.position.set(
-                        this.app.screen.width / 2,
-                        this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
-                    )
+                    this.ball.position.set(this.app.screen.width / 2, this.ballPositionY)
 
                     const randIndex = this.randomIntFromInterval(0, this.gameplayPod.availableIndexSpawnBall)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
@@ -259,7 +257,7 @@ export class GameScene extends PIXI.Container {
         if (this.ball != undefined) {
             Matter.Body.setPosition(this.ball.getBody(), {
                 x: this.app.screen.width / 2,
-                y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50,
+                y: this.ballPositionY,
             })
         }
 
