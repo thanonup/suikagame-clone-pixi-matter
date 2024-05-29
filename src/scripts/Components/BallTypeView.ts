@@ -30,6 +30,7 @@ export class BallTypeView extends Container {
     // private sub: gsap.core.Omit<gsap.core.Tween, 'then'>
     private movingTween: gsap.core.Tween
     private mergingTween: gsap.core.Tween
+    private gameoverTween: gsap.core.Tween
 
     constructor() {
         super()
@@ -190,11 +191,30 @@ export class BallTypeView extends Container {
         return this.movingTween
     }
 
+    public tweenGameOverBallOnLine() {
+        if (this.gameoverTween == undefined || null) {
+            this.gameoverTween = gsap.fromTo(
+                this,
+                { alpha: 1 },
+                {
+                    alpha: 0.2,
+                    duration: 0.1,
+                    yoyo: true,
+                    repeat: 20,
+                    onComplete: () => {
+                        this.alpha = 1
+                    },
+                }
+            )
+        }
+    }
+
     public onDestroy() {
         this.pod = undefined
         this.diposeSubscription?.unsubscribe()
         this.beanSubscription?.unsubscribe()
         this.delaySubscription?.unsubscribe()
+        this.gameoverTween?.kill()
 
         this?.destroy()
     }

@@ -41,10 +41,14 @@ export class GameController extends Graphics {
         this.cursor = 'pointer'
 
         this.on('pointerup', (event) => {
+            if (this.isAvailableMove()) return
+
             this.isClick = false
             this.onMouseUp(event.x)
         })
         this.on('pointerdown', () => {
+            if (this.isAvailableMove()) return
+
             this.isClick = true
             this.mouseMoveTimer = timer(250).subscribe(() => {
                 this.isMouseMove = true
@@ -52,6 +56,8 @@ export class GameController extends Graphics {
         })
 
         this.on('pointermove', (event) => {
+            if (this.isAvailableMove()) return
+
             if (!this.isMouseMove) return
 
             if (this.isClick) {
@@ -60,6 +66,8 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointerup', (event) => {
+            if (this.isAvailableMove()) return
+
             if (this.isClick) {
                 this.isClick = false
                 this.onMouseUp(event.x)
@@ -67,6 +75,8 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointermove', (event) => {
+            if (this.isAvailableMove()) return
+
             if (!this.isMouseMove) return
 
             if (this.isClick) {
@@ -131,6 +141,10 @@ export class GameController extends Graphics {
         }
 
         this.isMouseMove = false
+    }
+
+    private isAvailableMove(): boolean {
+        return this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState
     }
 
     public resize() {

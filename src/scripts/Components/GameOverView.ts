@@ -9,6 +9,7 @@ import { Subscription, timer } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
 import { BallStateType } from '../Types/BallStateType'
 import { gsap } from 'gsap'
+import { BallTypeView } from './BallTypeView'
 
 export class GameOverView extends Container {
     private app: Application
@@ -18,6 +19,9 @@ export class GameOverView extends Container {
     private engine: Matter.Engine
 
     private lineGameover: Graphics
+    private lineYPosition: number
+
+    private ballsInLine: BallTypeView[] = []
 
     private gameOverLineBody: Matter.Body
     private gameOverAlertBody: Matter.Body
@@ -27,6 +31,7 @@ export class GameOverView extends Container {
 
     private disposeGameOver: Subscription
     private disposeGameOverAlert: Subscription
+    private disposeState: Subscription
 
     constructor() {
         super()
@@ -45,17 +50,13 @@ export class GameOverView extends Container {
     }
 
     public doInit(width: number, height) {
-        this.gameOverLineBody = Bodies.rectangle(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
-            width,
-            height,
-            {
-                label: 'gemeOverBody',
-                isStatic: true,
-                isSensor: true,
-            }
-        )
+        this.lineYPosition = this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100
+
+        this.gameOverLineBody = Bodies.rectangle(this.app.screen.width / 2, this.lineYPosition, width, height, {
+            label: 'gemeOverBody',
+            isStatic: true,
+            isSensor: true,
+        })
 
         this.gameOverAlertBody = Bodies.rectangle(
             this.app.screen.width / 2,
@@ -79,6 +80,20 @@ export class GameOverView extends Container {
         this.lineGameover.visible = false
 
         this.addChild(this.lineGameover)
+
+        this.createSubscription()
+    }
+
+    private createSubscription() {
+        this.disposeState = this.gameplayPod.gameplayState.subscribe((state) => {
+            if (state != GameplayState.GameplayState) {
+                this.lineGameover.visible = false
+                this.lineGameover.alpha = 0
+
+                this.alertStartTween?.kill()
+                this.alertTween?.kill()
+            }
+        })
     }
 
     private setTweenLine() {
@@ -109,6 +124,7 @@ export class GameOverView extends Container {
         if (this.isBallsIngameOverZone(event) && this.disposeGameOver == undefined) {
             this.disposeGameOver = timer(3000).subscribe((_) => {
                 this.gameManager.gameplayPod.setGameplayState(GameplayState.GameOverState)
+                this.ballsInLine.forEach((x) => x.tweenGameOverBallOnLine())
             })
         } else if (!this.isBallsIngameOverZone(event) && this.disposeGameOver != undefined) {
             this.disposeGameOver?.unsubscribe()
@@ -120,6 +136,7 @@ export class GameOverView extends Container {
 
     private checkBallsIngameOverAlertlZone(event: Matter.IEventCollision<Matter.Engine>) {
         let isBallsInZone = false
+
         event.pairs.forEach((collision) => {
             const bodys = [collision.bodyA, collision.bodyB]
             const ballBody = bodys.find((x) => x.label == 'Ball')
@@ -159,6 +176,7 @@ export class GameOverView extends Container {
 
     private isBallsIngameOverZone(event: Matter.IEventCollision<Matter.Engine>): boolean {
         let isBallsInZone = false
+        this.ballsInLine = []
         event.pairs.forEach((collision) => {
             const bodys = [collision.bodyA, collision.bodyB]
             const ballBody = bodys.find((x) => x.label == 'Ball')
@@ -166,7 +184,10 @@ export class GameOverView extends Container {
 
             if (ballBody != undefined && gameOverBody != undefined) {
                 const element = this.gameManager.findSpriteWithRigidbody(ballBody)
-                if (element?.getPod().ballStateType.value == BallStateType.Idle) isBallsInZone = true
+                if (element?.getPod().ballStateType.value == BallStateType.Idle) {
+                    isBallsInZone = true
+                    this.ballsInLine.push(element)
+                }
             }
         })
         return isBallsInZone
@@ -175,7 +196,7 @@ export class GameOverView extends Container {
     public resize() {
         Matter.Body.setPosition(this.gameOverLineBody, {
             x: this.app.screen.width / 2,
-            y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
+            y: this.lineYPosition,
         })
 
         Matter.Body.setPosition(this.gameOverAlertBody, {

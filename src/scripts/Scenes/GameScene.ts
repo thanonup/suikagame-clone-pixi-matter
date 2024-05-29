@@ -38,6 +38,8 @@ export class GameScene extends PIXI.Container {
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
+    private disposeGameoverTimer: Subscription
+    private disposeIntervalTimer: Subscription
 
     private gameController: GameController
     private restartButtonView: RestartButtonView
@@ -159,10 +161,12 @@ export class GameScene extends PIXI.Container {
     }
 
     private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {
+        if (this.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
     }
 
     private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
+        if (this.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
     }
 
@@ -294,14 +298,17 @@ export class GameScene extends PIXI.Container {
                         this.removeElement(this.gameManager.currentStaticBall.value)
 
                     let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
-                    interval(100)
-                        .pipe(take(elements.length))
-                        .subscribe((index) => {
-                            this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
-                            this.removeElement(elements[index])
-                            if (index === elements.length - 1)
-                                this.gameplayPod.setGameplayState(GameplayState.ResetState)
-                        })
+                    this.disposeGameoverTimer = timer(1000).subscribe((_) => {
+                        this.disposeIntervalTimer = interval(80)
+                            .pipe(take(elements.length))
+                            .subscribe((index) => {
+                                this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
+                                this.removeElement(elements[index])
+                                if (index === elements.length - 1)
+                                    this.gameplayPod.setGameplayState(GameplayState.ResultState)
+                            })
+                    })
+
                     break
             }
         })
@@ -310,14 +317,17 @@ export class GameScene extends PIXI.Container {
     private unSubscription() {
         this.disposeSpawner?.unsubscribe()
         this.disposeTimer?.unsubscribe()
+        this.disposeGameoverTimer?.unsubscribe()
+        this.disposeIntervalTimer?.unsubscribe()
 
         this.disposeSpawner = undefined
         this.disposeTimer = undefined
+        this.disposeGameoverTimer = undefined
+        this.disposeIntervalTimer = undefined
     }
 
     public onDestroy() {
-        this.disposeSpawner?.unsubscribe()
-        this.disposeTimer?.unsubscribe()
+        this.unSubscription()
 
         this?.destroy()
     }
