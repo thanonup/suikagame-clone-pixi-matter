@@ -59,9 +59,9 @@ export class GameOverView extends Container {
 
         this.gameOverAlertBody = Bodies.rectangle(
             this.app.screen.width / 2,
-            this.gameOverLineBody.position.y + height / 2 + 50,
+            this.gameOverLineBody.position.y + height / 2 + 35,
             width,
-            100,
+            70,
             {
                 label: 'gemeOverAlert',
                 isStatic: true,
@@ -73,7 +73,7 @@ export class GameOverView extends Container {
 
         this.lineGameover = new Graphics()
         this.lineGameover
-            .rect(this.gameOverLineBody.position.x, this.gameOverLineBody.position.y + height / 4, width, height / 2)
+            .rect(0, 0, width, height)
             .fill(0xff3050)
             .pivot.set(width / 2, height / 2)
         this.lineGameover.visible = false
@@ -177,6 +177,13 @@ export class GameOverView extends Container {
             x: this.app.screen.width / 2,
             y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100,
         })
+
+        Matter.Body.setPosition(this.gameOverAlertBody, {
+            x: this.app.screen.width / 2,
+            y: this.gameOverLineBody.position.y + 35,
+        })
+
+        this.lineGameover.position.set(this.gameOverLineBody.position.x, this.gameOverLineBody.position.y)
     }
 
     public onDestroy() {

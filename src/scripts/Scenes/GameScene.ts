@@ -116,7 +116,7 @@ export class GameScene extends PIXI.Container {
         )
 
         this.gameOverView = new GameOverView()
-        this.gameOverView.doInit(this.floorGraphic.width, this.floorGraphic.height)
+        this.gameOverView.doInit(this.floorGraphic.width, 10)
 
         // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -234,6 +234,7 @@ export class GameScene extends PIXI.Container {
 
     public resize() {
         this.gameController.resize()
+        this.gameOverView.resize()
 
         this.floorGraphic.position.set(
             this.gameController.x,
