@@ -137,7 +137,7 @@ export class GameScene extends PIXI.Container {
     }
 
     private ballSpawnAndSetting() {
-        this.ballPositionY = this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 40
+        this.ballPositionY = this.getCurrentYPositionBall()
 
         this.ball = new BallTypeView()
         this.ball.position.set(this.app.screen.width / 2, this.ballPositionY)
@@ -235,6 +235,8 @@ export class GameScene extends PIXI.Container {
     }
 
     public resize() {
+        this.ballPositionY = this.getCurrentYPositionBall()
+
         this.gameController.resize()
         this.gameOverView.resize()
 
@@ -279,6 +281,10 @@ export class GameScene extends PIXI.Container {
         })
 
         this.gameManager.originalScreen = { width: this.app.screen.width, height: this.app.screen.height }
+    }
+
+    private getCurrentYPositionBall(): number {
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 40
     }
 
     private SubscribeSetup() {

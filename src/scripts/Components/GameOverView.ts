@@ -50,7 +50,7 @@ export class GameOverView extends Container {
     }
 
     public doInit(width: number, height) {
-        this.lineYPosition = this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100
+        this.lineYPosition = this.getGameOverPosition()
 
         this.gameOverLineBody = Bodies.rectangle(this.app.screen.width / 2, this.lineYPosition, width, height, {
             label: 'gemeOverBody',
@@ -192,8 +192,13 @@ export class GameOverView extends Container {
         })
         return isBallsInZone
     }
+    private getGameOverPosition(): number {
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100
+    }
 
     public resize() {
+        this.lineYPosition = this.getGameOverPosition()
+
         Matter.Body.setPosition(this.gameOverLineBody, {
             x: this.app.screen.width / 2,
             y: this.lineYPosition,
