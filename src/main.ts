@@ -19,7 +19,7 @@ const bootstrap = async () => {
 
     var container = document.getElementById('container')
 
-    const engine = Engine.create()
+    const engine = Engine.create({ gravity: { y: 1.5 } })
     const render = Render.create({
         element: container,
         engine: engine,
@@ -50,6 +50,7 @@ const bootstrap = async () => {
         app.ticker.add(gameScene.update, gameScene)
 
         resize()
+        window.addEventListener('resize', resize)
     })
 
     timer(2000).subscribe((_) => {
@@ -57,8 +58,6 @@ const bootstrap = async () => {
         // app.ticker.remove(gameScene.update, gameScene)
         // app.stage.removeChild(gameScene)
     })
-
-    window.addEventListener('resize', resize)
 
     function resize() {
         const windowWidth = window.innerWidth
