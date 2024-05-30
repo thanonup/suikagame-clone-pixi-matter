@@ -31,6 +31,8 @@ export class BallTypeView extends Container {
     private movingTween: gsap.core.Tween
     private mergingTween: gsap.core.Tween
 
+    private oldSize: number
+
     constructor() {
         super()
         this.gameManager = GameManager.instance
@@ -71,6 +73,7 @@ export class BallTypeView extends Container {
             this.circle.setSize(bean.size * 2)
 
             const oldBody = this.rigidBody
+            if (oldBody) this.oldSize = oldBody.circleRadius
 
             this.rigidBody = undefined
             this.rigidBody = Bodies.circle(
@@ -110,7 +113,8 @@ export class BallTypeView extends Container {
                     this.freezeBall(false)
                     break
                 case BallStateType.Merge: {
-                    Matter.Body.scale(this.rigidBody, 0.25, 0.25)
+                    let scaleDownSize = this.oldSize / this.rigidBody.circleRadius
+                    Matter.Body.scale(this.rigidBody, scaleDownSize, scaleDownSize)
 
                     const originImageScale: number = this.circle.scale._x
                     this.mergingTween = gsap.to(this, {
