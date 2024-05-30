@@ -14,6 +14,7 @@
     },
     "dependencies": {
         "@pixi/layout": "^2.0.1",
+        "@pixi/particle-emitter": "^5.0.8",
         "@pixi/sound": "^6.0.0",
         "@pixi/ui": "^2.0.1",
         "@types/matter-js": "^0.19.6",
