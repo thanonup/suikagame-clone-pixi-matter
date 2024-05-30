@@ -54,7 +54,7 @@ export class GameScoreView extends Container {
                     this.scoreText.text = this.score
                     break
                 }
-                case GameplayState.ResetState: {
+                case GameplayState.ResultState: {
                     this.tweeningScore?.unsubscribe()
                     this.score = this.gameManager.score.value
                     this.scoreText.text = this.score

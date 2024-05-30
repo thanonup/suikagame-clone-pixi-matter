@@ -16,6 +16,7 @@ import { Assets } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { GameOverView } from '../Components/GameOverView'
 import { particleTest } from '../particleTest'
+import { sound } from '@pixi/sound'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -35,9 +36,12 @@ export class GameScene extends PIXI.Container {
     private wallRightBody: Matter.Body
 
     private ball: BallTypeView
+    private ballPositionY: number
 
     private disposeSpawner: Subscription
     private disposeTimer: Subscription
+    private disposeGameoverTimer: Subscription
+    private disposeIntervalTimer: Subscription
 
     private gameController: GameController
     private restartButtonView: RestartButtonView
@@ -119,7 +123,7 @@ export class GameScene extends PIXI.Container {
         )
 
         this.gameOverView = new GameOverView()
-        this.gameOverView.doInit(this.floorGraphic.width, this.floorGraphic.height)
+        this.gameOverView.doInit(this.floorGraphic.width, 130)
 
         // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -137,11 +141,11 @@ export class GameScene extends PIXI.Container {
     }
 
     private ballSpawnAndSetting() {
+        this.ballPositionY = this.getCurrentYPositionBall()
+
         this.ball = new BallTypeView()
-        this.ball.position.set(
-            this.app.screen.width / 2,
-            this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
-        )
+        this.ball.position.set(this.app.screen.width / 2, this.ballPositionY)
+
         this.ball.doInit(this.gameManager.gameplayPod.ballBeans[0], 0)
         this.gameManager.elements.push(this.ball)
 
@@ -150,10 +154,7 @@ export class GameScene extends PIXI.Container {
                 this.ball = undefined
                 this.disposeTimer = timer(1000).subscribe((_) => {
                     this.ball = new BallTypeView()
-                    this.ball.position.set(
-                        this.app.screen.width / 2,
-                        this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50
-                    )
+                    this.ball.position.set(this.app.screen.width / 2, this.ballPositionY)
 
                     const randIndex = this.randomIntFromInterval(0, this.gameplayPod.availableIndexSpawnBall)
                     this.ball.doInit(this.gameManager.gameplayPod.ballBeans[randIndex], randIndex)
@@ -164,10 +165,12 @@ export class GameScene extends PIXI.Container {
     }
 
     private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {
+        if (this.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
     }
 
     private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
+        if (this.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
         event.pairs.forEach((collision) => this.doOnTrigger(collision))
     }
 
@@ -202,6 +205,8 @@ export class GameScene extends PIXI.Container {
                     if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
                         ballBPod.currentIndex++
 
+                        sound.play('merge')
+
                         ballBPod.changeCurrentBallBean(this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex])
                         if (
                             ballBPod.currentIndex > this.gameManager.gameplayPod.availableIndexSpawnBall &&
@@ -231,7 +236,10 @@ export class GameScene extends PIXI.Container {
     }
 
     public resize() {
+        this.ballPositionY = this.getCurrentYPositionBall()
+
         this.gameController.resize()
+        this.gameOverView.resize()
 
         this.floorGraphic.position.set(
             this.gameController.x,
@@ -256,7 +264,7 @@ export class GameScene extends PIXI.Container {
         if (this.ball != undefined) {
             Matter.Body.setPosition(this.ball.getBody(), {
                 x: this.app.screen.width / 2,
-                y: this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 50,
+                y: this.ballPositionY,
             })
         }
 
@@ -276,6 +284,10 @@ export class GameScene extends PIXI.Container {
         this.gameManager.originalScreen = { width: this.app.screen.width, height: this.app.screen.height }
     }
 
+    private getCurrentYPositionBall(): number {
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 40
+    }
+
     private SubscribeSetup() {
         this.gameplayPod.gameplayState.subscribe((state) => {
             this.unSubscription()
@@ -291,16 +303,23 @@ export class GameScene extends PIXI.Container {
                 case GameplayState.GameOverState:
                     if (this.gameManager.currentStaticBall.value != undefined)
                         this.removeElement(this.gameManager.currentStaticBall.value)
+                    sound.stop('warning')
+                    sound.play('gameover', {
+                        end: 0.98,
+                        complete: () => {
+                            let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
+                            this.disposeIntervalTimer = interval(80)
+                                .pipe(take(elements.length))
+                                .subscribe((index) => {
+                                    sound.play('destroy')
+                                    this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
+                                    this.removeElement(elements[index])
+                                    if (index === elements.length - 1)
+                                        this.gameplayPod.setGameplayState(GameplayState.ResultState)
+                                })
+                        },
+                    })
 
-                    let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
-                    interval(100)
-                        .pipe(take(elements.length))
-                        .subscribe((index) => {
-                            this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
-                            this.removeElement(elements[index])
-                            if (index === elements.length - 1)
-                                this.gameplayPod.setGameplayState(GameplayState.ResetState)
-                        })
                     break
             }
         })
@@ -309,14 +328,17 @@ export class GameScene extends PIXI.Container {
     private unSubscription() {
         this.disposeSpawner?.unsubscribe()
         this.disposeTimer?.unsubscribe()
+        this.disposeGameoverTimer?.unsubscribe()
+        this.disposeIntervalTimer?.unsubscribe()
 
         this.disposeSpawner = undefined
         this.disposeTimer = undefined
+        this.disposeGameoverTimer = undefined
+        this.disposeIntervalTimer = undefined
     }
 
     public onDestroy() {
-        this.disposeSpawner?.unsubscribe()
-        this.disposeTimer?.unsubscribe()
+        this.unSubscription()
 
         this?.destroy()
     }

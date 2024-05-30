@@ -4,6 +4,7 @@ import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
 import { Observable, Subscription, observable, timer } from 'rxjs'
+import { sound } from '@pixi/sound'
 
 export class GameController extends Graphics {
     private app: Application
@@ -41,17 +42,25 @@ export class GameController extends Graphics {
         this.cursor = 'pointer'
 
         this.on('pointerup', (event) => {
+            if (this.isAvailableMove()) return
+
             this.isClick = false
             this.onMouseUp(event.x)
         })
-        this.on('pointerdown', () => {
+        this.on('pointerdown', (event) => {
+            if (this.isAvailableMove()) return
+
             this.isClick = true
-            this.mouseMoveTimer = timer(250).subscribe(() => {
+
+            this.onMouseDown(event.x)
+            this.mouseMoveTimer = timer(200).subscribe(() => {
                 this.isMouseMove = true
             })
         })
 
         this.on('pointermove', (event) => {
+            if (this.isAvailableMove()) return
+
             if (!this.isMouseMove) return
 
             if (this.isClick) {
@@ -60,6 +69,8 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointerup', (event) => {
+            if (this.isAvailableMove()) return
+
             if (this.isClick) {
                 this.isClick = false
                 this.onMouseUp(event.x)
@@ -67,6 +78,8 @@ export class GameController extends Graphics {
         })
 
         window.addEventListener('pointermove', (event) => {
+            if (this.isAvailableMove()) return
+
             if (!this.isMouseMove) return
 
             if (this.isClick) {
@@ -74,6 +87,28 @@ export class GameController extends Graphics {
                 this.limitMoveBall(event.x)
             }
         })
+
+        window.addEventListener('blur', () => {
+            this.doOnOutOfFocus()
+        })
+
+        window.addEventListener('contextmenu', () => {
+            this.doOnOutOfFocus()
+        })
+    }
+
+    private doOnOutOfFocus() {
+        if (this.isClick) {
+            if (this.isAvailableMove()) return
+            this.mouseMoveTimer?.unsubscribe()
+            this.isClick = false
+
+            const currentStaticBall = this.gameManager.currentStaticBall.value
+            if (currentStaticBall) {
+                currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                this.gameManager.changeStateBallView(undefined)
+            }
+        }
     }
 
     private limitMoveBall(xPos: number) {
@@ -106,31 +141,39 @@ export class GameController extends Graphics {
         return xPos
     }
 
-    private async onMouseUp(xPos: number) {
+    private onMouseUp(xPos: number) {
         this.mouseMoveTimer?.unsubscribe()
-
-        if (this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState) return
 
         const currentStaticBall = this.gameManager.currentStaticBall.value
 
         if (currentStaticBall) {
-            // this.limitMoveBall(xPos)
             xPos = this.getClampPositionX(xPos)
             if (!this.isMouseMove) {
-                this.movingTween = currentStaticBall.tweenPosition(xPos)
-                this.gameManager.changeStateBallView(undefined)
-                this.movingTween.then(() => {
+                this.movingTween = currentStaticBall.tweenPositionRelease(xPos, () => {
                     currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                    sound.play('drop1', { start: 0.502, volume: 2 })
                 })
+                this.gameManager.changeStateBallView(undefined)
             } else {
                 this.gameManager.changeStateBallView(undefined)
                 currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                sound.play('drop1', { start: 0.502, volume: 2 })
             }
-        } else {
-            console.log('noting ball')
         }
 
         this.isMouseMove = false
+    }
+
+    private onMouseDown(xPos: number) {
+        const currentStaticBall = this.gameManager.currentStaticBall.value
+
+        if (currentStaticBall) {
+            currentStaticBall.tweenPosition(this.getClampPositionX(xPos), 0.1)
+        }
+    }
+
+    private isAvailableMove(): boolean {
+        return this.gameManager.gameplayPod.gameplayState.value != GameplayState.GameplayState
     }
 
     public resize() {

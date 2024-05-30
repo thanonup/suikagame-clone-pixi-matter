@@ -3,6 +3,7 @@ import { Application, Assets } from 'pixi.js'
 import { Engine, Render, Runner } from 'matter-js'
 import { timer } from 'rxjs'
 import Matter from 'matter-js'
+import { sound } from '@pixi/sound'
 
 const bootstrap = async () => {
     const backgroundColor = '#fee2b0'
@@ -19,7 +20,7 @@ const bootstrap = async () => {
 
     var container = document.getElementById('container')
 
-    const engine = Engine.create()
+    const engine = Engine.create({ gravity: { y: 1.5 } })
     const render = Render.create({
         element: container,
         engine: engine,
@@ -50,6 +51,9 @@ const bootstrap = async () => {
         app.ticker.add(gameScene.update, gameScene)
 
         resize()
+        window.addEventListener('resize', resize)
+
+        // sound.play('musicBackground', { volume: 0.5, loop: true })
     })
 
     timer(2000).subscribe((_) => {
@@ -57,8 +61,6 @@ const bootstrap = async () => {
         // app.ticker.remove(gameScene.update, gameScene)
         // app.stage.removeChild(gameScene)
     })
-
-    window.addEventListener('resize', resize)
 
     function resize() {
         const windowWidth = window.innerWidth
@@ -100,6 +102,16 @@ async function preload() {
         tiger: '/assets/game-assets/tiger.png',
         turtle: '/assets/game-assets/turtle.png',
         wolf: '/assets/game-assets/wolf.png',
+    })
+
+    sound.add({
+        musicBackground: '/sounds/game-background-sound.mp3',
+        destroy: '/sounds/destroy-sound.mp3',
+        drop1: '/sounds/drop-sound.mp3',
+        drop2: '/sounds/drop2-sound.mp3',
+        merge: '/sounds/merge-sound.mp3',
+        warning: '/sounds/warning-sound.mp3',
+        gameover: '/sounds/gameover-sound.mp3',
     })
 }
 

@@ -21,7 +21,7 @@
         "name": "wolf",
         "ballType": "Wolf",
         "score": 20,
-        "size": 35,
+        "size": 30,
         "colorCode": "#BA55D3",
         "mass": 8,
         "assetKey": "wolf"
@@ -30,7 +30,7 @@
         "name": "pig",
         "ballType": "Pig",
         "score": 25,
-        "size": 40,
+        "size": 35,
         "colorCode": "#FFA07A",
         "mass": 12,
         "assetKey": "pig"
@@ -39,7 +39,7 @@
         "name": "goat",
         "ballType": "Goat",
         "score": 30,
-        "size": 50,
+        "size": 45,
         "colorCode": "#FF4500",
         "mass": 16,
         "assetKey": "goat"
@@ -48,7 +48,7 @@
         "name": "cow",
         "ballType": "Cow",
         "score": 35,
-        "size": 55,
+        "size": 50,
         "colorCode": "#FFD700",
         "mass": 24,
         "assetKey": "cow"

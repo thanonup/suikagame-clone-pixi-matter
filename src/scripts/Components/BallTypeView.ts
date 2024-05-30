@@ -9,6 +9,7 @@ import { BallBean } from '../Beans/BallBean'
 import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 import { gsap } from 'gsap'
+import { sound } from '@pixi/sound'
 
 export class BallTypeView extends Container {
     private scene: Container
@@ -30,6 +31,7 @@ export class BallTypeView extends Container {
     // private sub: gsap.core.Omit<gsap.core.Tween, 'then'>
     private movingTween: gsap.core.Tween
     private mergingTween: gsap.core.Tween
+    private gameoverTween: gsap.core.Tween
 
     private oldSize: number
 
@@ -62,7 +64,7 @@ export class BallTypeView extends Container {
         this.ticker.add(() => {
             Matter.Body.setPosition(this.rigidBody, {
                 x: this.targetPosition.x,
-                y: this.targetPosition.y,
+                y: this.rigidBody.position.y,
             })
         })
     }
@@ -104,6 +106,7 @@ export class BallTypeView extends Container {
                 case BallStateType.IdleFromStatic:
                     this.freezeBall(false)
                     this.delaySubscription?.unsubscribe()
+                    this.rigidBody.force.y = 0.05
                     this.delaySubscription = timer(500).subscribe((_) => {
                         this.pod.changeBallState(BallStateType.Idle)
                     })
@@ -159,11 +162,27 @@ export class BallTypeView extends Container {
         Matter.Body.setPosition(this.rigidBody, { x: xPos, y: this.rigidBody.position.y })
     }
 
-    public tweenPosition(target: number | Point) {
+    public tweenPosition(target: number, duration: number) {
         this.targetPosition.position = this.rigidBody.position
         this.ticker.start()
         this.movingTween?.kill()
-        let duration = 0.4
+
+        this.movingTween = gsap.to(this.targetPosition, {
+            x: target,
+            duration,
+            onComplete: () => {
+                this.ticker.stop()
+            },
+        })
+    }
+
+    public tweenPositionRelease(target: number | Point, doOnComplete: Function) {
+        this.targetPosition.position = this.rigidBody.position
+        this.ticker.start()
+        this.movingTween?.kill()
+        let duration = 0.2
+        const startPos = this.targetPosition.x
+        let isCallBack: boolean = false
         // if (typeof target === 'number') this.sub = await gsap.to(this.targetPosition, { x: target, duration: 0.3 })
         // else this.sub = await gsap.to(this.targetPosition, { x: target.x, y: target.y, duration: 0.3 })
 
@@ -171,11 +190,21 @@ export class BallTypeView extends Container {
             this.movingTween = gsap.to(this.targetPosition, {
                 x: target,
                 duration,
+                onUpdate: () => {
+                    const progress = this.normalize(this.targetPosition.x, startPos, target)
+
+                    if (!isCallBack && progress >= 0.4) {
+                        isCallBack = true
+
+                        doOnComplete()
+                    }
+                },
                 onComplete: () => {
                     this.ticker.stop()
                 },
                 onInterrupt: () => {
                     this.ticker.stop()
+                    doOnComplete()
                 },
             })
         else
@@ -185,13 +214,33 @@ export class BallTypeView extends Container {
                 duration,
                 onComplete: () => {
                     this.ticker.stop()
+                    doOnComplete()
                 },
                 onInterrupt: () => {
                     this.ticker.stop()
+                    doOnComplete()
                 },
             })
 
         return this.movingTween
+    }
+
+    public tweenGameOverBallOnLine() {
+        if (this.gameoverTween == undefined || null) {
+            this.gameoverTween = gsap.fromTo(
+                this,
+                { alpha: 1 },
+                {
+                    alpha: 0.2,
+                    duration: 0.1,
+                    yoyo: true,
+                    repeat: 20,
+                    onComplete: () => {
+                        this.alpha = 1
+                    },
+                }
+            )
+        }
     }
 
     public onDestroy() {
@@ -199,12 +248,13 @@ export class BallTypeView extends Container {
         this.diposeSubscription?.unsubscribe()
         this.beanSubscription?.unsubscribe()
         this.delaySubscription?.unsubscribe()
+        this.gameoverTween?.kill()
 
         this?.destroy()
     }
 
     normalize(val: number, min: number, max: number): number {
-        return +Math.max(min, Math.min(val, max)).toFixed(2)
+        return +((val - min) / (max - min)).toFixed(4)
     }
 
     inverseNormalize(normalizeVal: number, min: number, max: number): number {
