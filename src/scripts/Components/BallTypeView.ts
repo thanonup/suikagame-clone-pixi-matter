@@ -61,7 +61,7 @@ export class BallTypeView extends Container {
         this.ticker.add(() => {
             Matter.Body.setPosition(this.rigidBody, {
                 x: this.targetPosition.x,
-                y: this.targetPosition.y,
+                y: this.rigidBody.position.y,
             })
         })
     }
@@ -176,7 +176,8 @@ export class BallTypeView extends Container {
         this.ticker.start()
         this.movingTween?.kill()
         let duration = 0.2
-
+        const startPos = this.targetPosition.x
+        let isCallBack: boolean = false
         // if (typeof target === 'number') this.sub = await gsap.to(this.targetPosition, { x: target, duration: 0.3 })
         // else this.sub = await gsap.to(this.targetPosition, { x: target.x, y: target.y, duration: 0.3 })
 
@@ -184,9 +185,17 @@ export class BallTypeView extends Container {
             this.movingTween = gsap.to(this.targetPosition, {
                 x: target,
                 duration,
+                onUpdate: () => {
+                    const progress = this.normalize(this.targetPosition.x, startPos, target)
+
+                    if (!isCallBack && progress >= 0.4) {
+                        isCallBack = true
+
+                        doOnComplete()
+                    }
+                },
                 onComplete: () => {
                     this.ticker.stop()
-                    doOnComplete()
                 },
                 onInterrupt: () => {
                     this.ticker.stop()
