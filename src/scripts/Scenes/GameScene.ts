@@ -15,6 +15,7 @@ import { GameScoreView } from '../UI/GameScoreView'
 import { Assets } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { GameOverView } from '../Components/GameOverView'
+import { sound } from '@pixi/sound'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -119,7 +120,7 @@ export class GameScene extends PIXI.Container {
         )
 
         this.gameOverView = new GameOverView()
-        this.gameOverView.doInit(this.floorGraphic.width, 10)
+        this.gameOverView.doInit(this.floorGraphic.width, 130)
 
         // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -205,6 +206,8 @@ export class GameScene extends PIXI.Container {
 
                     if (ballBPod.currentIndex < this.gameManager.gameplayPod.ballBeans.length - 1) {
                         ballBPod.currentIndex++
+
+                        sound.play('merge')
 
                         ballBPod.changeCurrentBallBean(this.gameManager.gameplayPod.ballBeans[ballBPod.currentIndex])
                         if (
@@ -302,17 +305,21 @@ export class GameScene extends PIXI.Container {
                 case GameplayState.GameOverState:
                     if (this.gameManager.currentStaticBall.value != undefined)
                         this.removeElement(this.gameManager.currentStaticBall.value)
-
-                    let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
-                    this.disposeGameoverTimer = timer(1000).subscribe((_) => {
-                        this.disposeIntervalTimer = interval(80)
-                            .pipe(take(elements.length))
-                            .subscribe((index) => {
-                                this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
-                                this.removeElement(elements[index])
-                                if (index === elements.length - 1)
-                                    this.gameplayPod.setGameplayState(GameplayState.ResultState)
-                            })
+                    sound.stop('warning')
+                    sound.play('gameover', {
+                        end: 0.98,
+                        complete: () => {
+                            let elements = this.gameManager.elements.sort((a, b) => a.position.y - b.position.y)
+                            this.disposeIntervalTimer = interval(80)
+                                .pipe(take(elements.length))
+                                .subscribe((index) => {
+                                    sound.play('destroy')
+                                    this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
+                                    this.removeElement(elements[index])
+                                    if (index === elements.length - 1)
+                                        this.gameplayPod.setGameplayState(GameplayState.ResultState)
+                                })
+                        },
                     })
 
                     break

@@ -10,6 +10,7 @@ import { GameplayState } from '../Enum/GameplayState'
 import { BallStateType } from '../Types/BallStateType'
 import { gsap } from 'gsap'
 import { BallTypeView } from './BallTypeView'
+import { IMediaInstance, sound } from '@pixi/sound'
 
 export class GameOverView extends Container {
     private app: Application
@@ -32,6 +33,8 @@ export class GameOverView extends Container {
     private disposeGameOver: Subscription
     private disposeGameOverAlert: Subscription
     private disposeState: Subscription
+
+    private soundWarning: IMediaInstance
 
     constructor() {
         super()
@@ -74,7 +77,7 @@ export class GameOverView extends Container {
 
         this.lineGameover = new Graphics()
         this.lineGameover
-            .rect(0, 0, width, height)
+            .rect(0, height - 10, width, 10)
             .fill(0xff3050)
             .pivot.set(width / 2, height / 2)
         this.lineGameover.visible = false
@@ -152,10 +155,13 @@ export class GameOverView extends Container {
                 this.disposeGameOverAlert = timer(1500).subscribe((_) => {
                     this.lineGameover.visible = true
                     this.setTweenLine()
+
+                    sound.play('warning', { loop: true, volume: 0.4 })
                 })
             }
         } else {
             if (this.disposeGameOverAlert != undefined) {
+                sound.stop('warning')
                 this.disposeGameOverAlert?.unsubscribe()
                 this.disposeGameOverAlert = undefined
 
@@ -193,7 +199,7 @@ export class GameOverView extends Container {
         return isBallsInZone
     }
     private getGameOverPosition(): number {
-        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 45
     }
 
     public resize() {
@@ -206,7 +212,7 @@ export class GameOverView extends Container {
 
         Matter.Body.setPosition(this.gameOverAlertBody, {
             x: this.app.screen.width / 2,
-            y: this.gameOverLineBody.position.y + 35,
+            y: this.gameOverLineBody.position.y + 100,
         })
 
         this.lineGameover.position.set(this.gameOverLineBody.position.x, this.gameOverLineBody.position.y)

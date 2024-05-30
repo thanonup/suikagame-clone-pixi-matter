@@ -4,6 +4,7 @@ import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
 import { Observable, Subscription, observable, timer } from 'rxjs'
+import { sound } from '@pixi/sound'
 
 export class GameController extends Graphics {
     private app: Application
@@ -150,11 +151,13 @@ export class GameController extends Graphics {
             if (!this.isMouseMove) {
                 this.movingTween = currentStaticBall.tweenPositionRelease(xPos, () => {
                     currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                    sound.play('drop1', { start: 0.502, volume: 2 })
                 })
                 this.gameManager.changeStateBallView(undefined)
             } else {
                 this.gameManager.changeStateBallView(undefined)
                 currentStaticBall.getPod().changeBallState(BallStateType.IdleFromStatic)
+                sound.play('drop1', { start: 0.502, volume: 2 })
             }
         }
 

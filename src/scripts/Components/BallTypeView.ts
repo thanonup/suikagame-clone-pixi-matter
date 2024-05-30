@@ -9,6 +9,7 @@ import { BallBean } from '../Beans/BallBean'
 import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 import { gsap } from 'gsap'
+import { sound } from '@pixi/sound'
 
 export class BallTypeView extends Container {
     private scene: Container
