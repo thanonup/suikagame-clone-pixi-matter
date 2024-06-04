@@ -66,6 +66,13 @@ export class GameScene extends PIXI.Container {
     public async doInit() {
         await this.gameplayPod.loadData()
         await Assets.loadBundle('gameAssets')
+        await Assets.loadBundle('fontsLoad')
+
+        this.restartButtonView = new RestartButtonView()
+        this.restartButtonView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+        this.gameScoreView = new GameScoreView()
+        this.gameScoreView.position.set(20, 10)
+        this.gameScoreView.doInit()
 
         this.SubscribeSetup()
 
@@ -120,7 +127,7 @@ export class GameScene extends PIXI.Container {
         )
 
         this.gameOverView = new GameOverView()
-        this.gameOverView.doInit(this.floorGraphic.width, 130)
+        this.gameOverView.doInit(this.floorGraphic.width, 180)
 
         // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -131,10 +138,6 @@ export class GameScene extends PIXI.Container {
         this.on('removed', () => {
             this.onDestroy()
         })
-
-        this.restartButtonView = new RestartButtonView()
-        this.restartButtonView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
-        this.gameScoreView = new GameScoreView(this.floorGraphic)
     }
 
     private ballSpawnAndSetting() {
@@ -282,7 +285,7 @@ export class GameScene extends PIXI.Container {
     }
 
     private getCurrentYPositionBall(): number {
-        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 40
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 100
     }
 
     private SubscribeSetup() {

@@ -2,6 +2,8 @@ import { Assets } from 'pixi.js'
 import { BallBean } from '../Beans/BallBean'
 import { GameplayState } from '../Enum/GameplayState'
 import { BehaviorSubject } from 'rxjs'
+import { LocalStorageService } from '../../services/LocalStorageService'
+import { ScoreSaveBean } from '../Beans/ScoreSaveBean'
 
 export class GameplayPod {
     public ballBeans: BallBean[] = []
@@ -10,6 +12,13 @@ export class GameplayPod {
     public gameplayState: BehaviorSubject<GameplayState> = new BehaviorSubject<GameplayState>(
         GameplayState.GameplayState
     )
+    public highScoreBean: ScoreSaveBean
+
+    private localStorageService: LocalStorageService
+
+    constructor() {
+        this.localStorageService = new LocalStorageService()
+    }
 
     public async loadData() {
         const data = await Assets.load<BallBean[]>('/assets/ball-data.json')
@@ -25,5 +34,15 @@ export class GameplayPod {
 
     public restartGame() {
         this.availableIndexSpawnBall = 0
+    }
+
+    public getScoreData() {
+        this.highScoreBean = this.localStorageService.getDataScoreData()
+    }
+
+    public saveHightScore(score: number) {
+        this.highScoreBean.highScore = score
+
+        this.localStorageService.saveSettingData()
     }
 }
