@@ -75,6 +75,7 @@ export class GameScoreView extends Container {
             x: this.x,
             y: this.y,
             duration: 0.5,
+            ease: 'back.out',
         })
 
         this.inTween.pause()
@@ -83,6 +84,7 @@ export class GameScoreView extends Container {
             x: this.x,
             y: this.y - 100,
             duration: 0.5,
+            ease: 'back.in',
         })
         this.outTween.pause()
         this.outTween.seek(0.5, false)
@@ -107,6 +109,15 @@ export class GameScoreView extends Container {
                     this.scoreText.text = this.score
 
                     this.gameplayPod.getScoreData()
+                    let score = this.gameplayPod.highScoreBean.highScore
+                    this.hightScore.text = `HighScore :  ${this.gameplayPod.highScoreBean.highScore}`
+
+                    if (score == 0) {
+                        this.hightScore.visible = false
+                    } else {
+                        this.hightScore.visible = true
+                    }
+
                     this.inTween.restart()
                     break
                 }
