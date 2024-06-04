@@ -8,4 +8,5 @@ export class BallBean {
     public colorCode: string
     public mass: number
     public assetKey: string
+    public color: Array<any>
 }

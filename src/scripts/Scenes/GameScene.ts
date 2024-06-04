@@ -15,7 +15,6 @@ import { GameScoreView } from '../UI/GameScoreView'
 import { Assets } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { GameOverView } from '../Components/GameOverView'
-import { particleTest } from '../particleTest'
 import { sound } from '@pixi/sound'
 
 gsap.registerPlugin(PixiPlugin)
@@ -62,8 +61,6 @@ export class GameScene extends PIXI.Container {
         Matter.Events.on(this.engine, 'collisionActive', (event) => this.onCollisionStay(event))
 
         app.stage.hitArea = app.screen
-
-        new particleTest()
     }
 
     public async doInit() {
