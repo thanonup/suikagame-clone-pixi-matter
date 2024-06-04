@@ -53,7 +53,7 @@ const bootstrap = async () => {
         resize()
         window.addEventListener('resize', resize)
 
-        // sound.play('musicBackground', { volume: 0.5, loop: true })
+        sound.play('musicBackground', { start: 2.5, volume: 0.25, loop: true })
     })
 
     timer(2000).subscribe((_) => {
@@ -104,8 +104,19 @@ async function preload() {
         wolf: '/assets/game-assets/wolf.png',
     })
 
+    await Assets.addBundle('fontsLoad', {
+        sakuraBlossom: {
+            src: '/fonts/sakura-blossom.ttf',
+            data: { family: 'sakura-blossom' },
+        },
+        poetsenOneRegular: {
+            src: '/fonts/PoetsenOne-Regular.ttf',
+            data: { family: 'PoetsenOne-Regular' },
+        },
+    })
+
     sound.add({
-        musicBackground: '/sounds/game-background-sound.mp3',
+        musicBackground: '/sounds/pudding-bgm.mp3',
         destroy: '/sounds/destroy-sound.mp3',
         drop1: '/sounds/drop-sound.mp3',
         drop2: '/sounds/drop2-sound.mp3',

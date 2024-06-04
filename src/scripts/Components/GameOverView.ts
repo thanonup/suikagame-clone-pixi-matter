@@ -30,6 +30,8 @@ export class GameOverView extends Container {
     private alertStartTween: gsap.core.Tween
     private alertTween: gsap.core.Tween
 
+    private heightGameOverLine: number
+
     private disposeGameOver: Subscription
     private disposeGameOverAlert: Subscription
     private disposeState: Subscription
@@ -53,6 +55,7 @@ export class GameOverView extends Container {
     }
 
     public doInit(width: number, height) {
+        this.heightGameOverLine = height
         this.lineYPosition = this.getGameOverPosition()
 
         this.gameOverLineBody = Bodies.rectangle(this.app.screen.width / 2, this.lineYPosition, width, height, {
@@ -199,7 +202,7 @@ export class GameOverView extends Container {
         return isBallsInZone
     }
     private getGameOverPosition(): number {
-        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 45
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 75
     }
 
     public resize() {
@@ -212,7 +215,7 @@ export class GameOverView extends Container {
 
         Matter.Body.setPosition(this.gameOverAlertBody, {
             x: this.app.screen.width / 2,
-            y: this.gameOverLineBody.position.y + 100,
+            y: this.gameOverLineBody.position.y + this.heightGameOverLine / 2 + 35,
         })
 
         this.lineGameover.position.set(this.gameOverLineBody.position.x, this.gameOverLineBody.position.y)
