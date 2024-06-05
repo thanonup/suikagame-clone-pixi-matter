@@ -91,10 +91,11 @@ export class BallTypeView extends Container {
                     restitution: 0.2,
                     isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
                     // angle: 4.7,
-                    mass: bean.mass,
+                    mass: 1,
                 }
             )
-
+            this.rigidBody.density = bean.mass
+            console.log(bean.name + ' ' + this.rigidBody.density.toFixed(5))
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {
@@ -122,7 +123,7 @@ export class BallTypeView extends Container {
                 case BallStateType.Merge: {
                     this.mergeParticle.play()
                     let scaleDownSize = this.oldSize / this.rigidBody.circleRadius
-                    Matter.Body.scale(this.rigidBody, scaleDownSize, scaleDownSize)
+                    // Matter.Body.scale(this.rigidBody, scaleDownSize, scaleDownSize)
 
                     const originImageScale: number = this.circle.scale._x
                     this.mergingTween = gsap.to(this, {
@@ -132,7 +133,7 @@ export class BallTypeView extends Container {
                             let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
                             let sizeMultiply = targetSize / this.rigidBody.circleRadius
                             this.circle.scale = originImageScale * this.mergingTween.progress()
-                            Matter.Body.scale(this.rigidBody, sizeMultiply, sizeMultiply)
+                            // Matter.Body.scale(this.rigidBody, sizeMultiply, sizeMultiply)
                         },
                     })
 
@@ -250,12 +251,11 @@ export class BallTypeView extends Container {
 
     public onDestroy() {
         this.pod = undefined
+        this.mergeParticle?.onDestroy()
         this.diposeSubscription?.unsubscribe()
         this.beanSubscription?.unsubscribe()
         this.delaySubscription?.unsubscribe()
         this.gameoverTween?.kill()
-        this.mergeParticle?.onDestroy()
-
         this?.destroy()
     }
 

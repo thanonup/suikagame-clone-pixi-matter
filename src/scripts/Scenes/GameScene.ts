@@ -69,11 +69,13 @@ export class GameScene extends PIXI.Container {
         await Assets.loadBundle('fontsLoad')
         await Assets.loadBundle('uiSprite')
 
+        this.sortableChildren = true
         this.gameController = new GameController()
         this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)
         this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
         this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
 
+        this.gameController._zIndex = -1
         this.floorGraphic = new PIXI.Graphics()
         this.floorGraphic
             .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH, 20)
