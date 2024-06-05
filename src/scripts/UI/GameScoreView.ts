@@ -140,7 +140,6 @@ export class GameScoreView extends Container {
                     this.inTween.reverse()
                     this.inTween.pause()
                 }
-                console.log('gameplay')
                 break
             case GameplayState.ResultState:
                 this.y = -100
