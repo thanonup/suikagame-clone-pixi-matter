@@ -341,6 +341,9 @@ export class GameScene extends PIXI.Container {
 
     public onDestroy() {
         this.unSubscription()
+        Matter.Composite.remove(this.gameManager.engine.world, this.groundBody)
+        Matter.Composite.remove(this.gameManager.engine.world, this.wallLeftBody)
+        Matter.Composite.remove(this.gameManager.engine.world, this.wallRightBody)
 
         this?.destroy()
     }
