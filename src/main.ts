@@ -83,10 +83,17 @@ const bootstrap = async () => {
 }
 
 async function preload() {
+    await Assets.addBundle('particle', {
+        emitter: 'assets/PixiJs_particle/emitter.json',
+        testEmitter: 'assets/PixiJs_particle/test_particle.json',
+    })
+
+    await Assets.add({ alias: 'particle', src: 'assets/sprites/particle.png' })
+
     await Assets.addBundle('uiSprite', {
-        start: 'src/sprites/Start.png',
-        gameOver: 'src/sprites/GameOver.png',
-        restart: 'src/sprites/restart.png',
+        start: 'assets/sprites/Start.png',
+        gameOver: 'assets/sprites/GameOver.png',
+        restart: 'assets/sprites/restart.png',
     })
 
     await Assets.addBundle('gameAssets', {

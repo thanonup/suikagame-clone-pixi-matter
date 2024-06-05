@@ -182,19 +182,14 @@ export class GameScene extends PIXI.Container {
     private doOnTrigger(collision: Matter.Pair) {
         let [bodyA, bodyB] = [collision.bodyA, collision.bodyB]
 
-        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') this.OnMerge(bodyA, bodyB)
+        if (bodyA.label == 'Ball' && bodyB.label == 'Ball') this.OnMerge(collision)
     }
 
-    private OnMerge(bodyA: Matter.Body, bodyB: Matter.Body) {
-        let elementA
-        let elementB
-        if (bodyA.position.y < bodyA.position.y) {
-            elementA = this.gameManager.findSpriteWithRigidbody(bodyA)
-            elementB = this.gameManager.findSpriteWithRigidbody(bodyB)
-        } else {
-            elementA = this.gameManager.findSpriteWithRigidbody(bodyB)
-            elementB = this.gameManager.findSpriteWithRigidbody(bodyA)
-        }
+    private OnMerge(collision: Matter.Pair) {
+        const bodys = [collision.bodyA, collision.bodyB].sort((a, b) => a.position.y - b.position.y)
+
+        let elementA = this.gameManager.findSpriteWithRigidbody(bodys[0])
+        let elementB = this.gameManager.findSpriteWithRigidbody(bodys[1])
 
         if (elementA && elementB) {
             const ballAPod: BallTypePod = elementA.getPod()

@@ -13,6 +13,7 @@
         "vite": "^5.2.0"
     },
     "dependencies": {
+        "@barvynkoa/particle-emitter": "^0.0.1",
         "@pixi/layout": "^2.0.1",
         "@pixi/sound": "^6.0.0",
         "@pixi/ui": "^2.0.1",

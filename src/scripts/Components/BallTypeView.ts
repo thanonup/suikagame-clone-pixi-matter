@@ -10,6 +10,7 @@ import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 import { gsap } from 'gsap'
 import { sound } from '@pixi/sound'
+import { mergeParticleView } from '../mergeParticleView'
 
 export class BallTypeView extends Container {
     private scene: Container
@@ -33,6 +34,9 @@ export class BallTypeView extends Container {
     private mergingTween: gsap.core.Tween
     private gameoverTween: gsap.core.Tween
 
+    private oldSize: number
+
+    private mergeParticle: mergeParticleView
     constructor() {
         super()
         this.gameManager = GameManager.instance
@@ -47,11 +51,13 @@ export class BallTypeView extends Container {
     public doInit(bean: BallBean, index: number) {
         this.pod = new BallTypePod(bean)
         this.pod.currentIndex = index
+        this.mergeParticle = new mergeParticleView(this.pod)
 
         this.circle = Sprite.from(bean.assetKey)
         this.circle.anchor.set(0.5)
 
         this.addChild(this.circle)
+        this.addChild(this.mergeParticle)
 
         this.setSubscription()
         this.setupTicker()
@@ -73,6 +79,7 @@ export class BallTypeView extends Container {
             this.circle.setSize(bean.size * 2)
 
             const oldBody = this.rigidBody
+            if (oldBody) this.oldSize = oldBody.circleRadius
 
             this.rigidBody = undefined
             this.rigidBody = Bodies.circle(
@@ -113,7 +120,9 @@ export class BallTypeView extends Container {
                     this.freezeBall(false)
                     break
                 case BallStateType.Merge: {
-                    Matter.Body.scale(this.rigidBody, 0.25, 0.25)
+                    this.mergeParticle.play()
+                    let scaleDownSize = this.oldSize / this.rigidBody.circleRadius
+                    Matter.Body.scale(this.rigidBody, scaleDownSize, scaleDownSize)
 
                     const originImageScale: number = this.circle.scale._x
                     this.mergingTween = gsap.to(this, {
@@ -245,6 +254,7 @@ export class BallTypeView extends Container {
         this.beanSubscription?.unsubscribe()
         this.delaySubscription?.unsubscribe()
         this.gameoverTween?.kill()
+        this.mergeParticle?.onDestroy()
 
         this?.destroy()
     }
