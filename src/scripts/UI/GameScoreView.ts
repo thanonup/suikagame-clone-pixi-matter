@@ -1,4 +1,4 @@
-import { Application, Container, FillGradient, Graphics, Text, TextStyle } from 'pixi.js'
+import { Application, Container, FillGradient, Graphics, Point, Text, TextStyle } from 'pixi.js'
 import { GameManager } from '../Managers/GameManager'
 import { Subscription, interval, takeWhile } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
@@ -82,12 +82,11 @@ export class GameScoreView extends Container {
 
         this.outTween = gsap.to(this, {
             x: this.x,
-            y: this.y - 100,
+            y: -100,
             duration: 0.5,
             ease: 'back.in',
         })
         this.outTween.pause()
-        this.outTween.seek(0.5, false)
     }
 
     private setupSubScribe() {
@@ -104,7 +103,7 @@ export class GameScoreView extends Container {
 
         this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
             switch (state) {
-                case GameplayState.GameplayState: {
+                case GameplayState.GameplayState:
                     this.score = 0
                     this.scoreText.text = this.score
 
@@ -117,20 +116,34 @@ export class GameScoreView extends Container {
                     } else {
                         this.hightScore.visible = true
                     }
-
+                    this.outTween.seek(0.5, false)
                     this.inTween.restart()
+
                     break
-                }
-                case GameplayState.ResultState: {
+                case GameplayState.ResultState:
                     this.tweeningScore?.unsubscribe()
                     this.score = this.gameManager.score.value
                     this.scoreText.text = this.score
 
                     this.gameplayPod.saveHightScore(this.score)
                     this.outTween.restart()
+
                     break
-                }
             }
         })
+    }
+
+    public onResize() {
+        switch (this.gameManager.gameplayPod.gameplayState.value) {
+            case GameplayState.GameplayState:
+                if (this.inTween.progress() > 0) {
+                    this.inTween.reverse()
+                    this.inTween.pause()
+                }
+                break
+            case GameplayState.ResultState:
+                this.y = -100
+                break
+        }
     }
 }

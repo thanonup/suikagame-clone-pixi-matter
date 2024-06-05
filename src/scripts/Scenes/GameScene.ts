@@ -7,7 +7,7 @@ import { GameController } from '../Components/GameController'
 import { Subscription, interval, take, timer } from 'rxjs'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
-import { RestartButtonView } from '../UI/RestartButtonView'
+import { ResultView } from '../UI/ResultView'
 import * as PIXI from 'pixi.js'
 import { gsap } from 'gsap'
 import { PixiPlugin } from 'gsap/PixiPlugin'
@@ -43,7 +43,7 @@ export class GameScene extends PIXI.Container {
     private disposeIntervalTimer: Subscription
 
     private gameController: GameController
-    private restartButtonView: RestartButtonView
+    private resultView: ResultView
     private gameScoreView: GameScoreView
     private gameOverView: GameOverView
 
@@ -67,14 +67,7 @@ export class GameScene extends PIXI.Container {
         await this.gameplayPod.loadData()
         await Assets.loadBundle('gameAssets')
         await Assets.loadBundle('fontsLoad')
-
-        this.restartButtonView = new RestartButtonView()
-        this.restartButtonView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
-        this.gameScoreView = new GameScoreView()
-        this.gameScoreView.position.set(20, 10)
-        this.gameScoreView.doInit()
-
-        this.SubscribeSetup()
+        await Assets.loadBundle('uiSprite')
 
         this.sortableChildren = true
         this.gameController = new GameController()
@@ -94,6 +87,13 @@ export class GameScene extends PIXI.Container {
         )
 
         this.addChild(this.floorGraphic)
+
+        this.gameScoreView = new GameScoreView()
+        this.gameScoreView.position.set(
+            this.app.screen.width / 2 - this.floorGraphic.width / 2,
+            this.app.screen.height / 2 - this.floorGraphic.width / 2 - 150
+        )
+        this.gameScoreView.doInit()
 
         this.groundBody = Bodies.rectangle(
             this.floorGraphic.getBounds().x + this.floorGraphic.width / 2,
@@ -130,6 +130,11 @@ export class GameScene extends PIXI.Container {
 
         this.gameOverView = new GameOverView()
         this.gameOverView.doInit(this.floorGraphic.width, 180)
+
+        this.SubscribeSetup()
+
+        this.resultView = new ResultView()
+        this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
 
         // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -243,6 +248,9 @@ export class GameScene extends PIXI.Container {
         this.gameController.resize()
         this.gameOverView.resize()
 
+        this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+        this.resultView.resize()
+
         this.floorGraphic.position.set(
             this.gameController.x,
             this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
@@ -269,6 +277,13 @@ export class GameScene extends PIXI.Container {
                 y: this.ballPositionY,
             })
         }
+
+        this.gameScoreView.position.set(
+            this.app.screen.width / 2 - this.floorGraphic.width / 2,
+            this.app.screen.height / 2 - this.floorGraphic.width / 2 - 150
+        )
+
+        this.gameScoreView.onResize()
 
         this.gameManager.elements.forEach((x) => {
             if (x.getPod().ballStateType.value != BallStateType.Static) {
