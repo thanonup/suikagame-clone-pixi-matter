@@ -1,7 +1,6 @@
 import * as PIXI from 'pixi.js'
 import { GameManager } from './Managers/GameManager'
-import { Emitter, EmitterConfigV1, EmitterConfigV2, EmitterConfigV3 } from '@barvynkoa/particle-emitter'
-import { BallBean } from './Beans/BallBean'
+import { Emitter, EmitterConfigV3 } from '@barvynkoa/particle-emitter'
 import { Subscription } from 'rxjs'
 import { BallTypePod } from './Components/Pod/BallTypePod'
 
@@ -14,6 +13,7 @@ export class mergeParticleView extends PIXI.Container {
 
     constructor(pod: BallTypePod) {
         super()
+
         this.pod = pod
         this.app = GameManager.instance.app
         this.doInit()
