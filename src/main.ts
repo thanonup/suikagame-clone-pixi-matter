@@ -111,6 +111,12 @@ async function preload() {
         wolf: '/assets/game-assets/wolf.png',
     })
 
+    await Assets.addBundle('jungle_btn', {
+        about: 'public/assets/sprites/jungle/btn/about.png',
+        close: 'public/assets/sprites/jungle/btn/close.png',
+        menu: 'public/assets/sprites/jungle/btn/menu.png',
+    })
+
     await Assets.addBundle('fontsLoad', {
         sakuraBlossom: {
             src: '/fonts/sakura-blossom.ttf',
