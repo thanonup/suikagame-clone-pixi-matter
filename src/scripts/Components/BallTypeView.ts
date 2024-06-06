@@ -78,20 +78,20 @@ export class BallTypeView extends Container {
             if (oldBody) this.oldSize = oldBody.circleRadius
 
             this.rigidBody = undefined
-            this.rigidBody = Bodies.circle(
+            this.rigidBody = Bodies.polygon(
                 this.circle.getBounds().x + this.circle.width / 2,
                 this.circle.getBounds().y + this.circle.height / 2,
+                16,
                 bean.size,
                 {
                     label: 'Ball',
                     restitution: 0.2,
                     isStatic: this.pod.ballStateType.value == BallStateType.Static ? true : false,
                     // angle: 4.7,
-                    mass: 1,
+                    mass: bean.mass,
                 }
             )
-            this.rigidBody.density = bean.mass
-            console.log(bean.name + ' ' + this.rigidBody.density.toFixed(5))
+            this.rigidBody.density = 0.1
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {
@@ -118,7 +118,7 @@ export class BallTypeView extends Container {
                     break
                 case BallStateType.Merge: {
                     this.mergeParticle.play()
-                    let scaleDownSize = this.oldSize / this.rigidBody.circleRadius
+                    // let scaleDownSize = this.oldSize / this.rigidBody.circleRadius
                     // Matter.Body.scale(this.rigidBody, scaleDownSize, scaleDownSize)
 
                     const originImageScale: number = this.circle.scale._x
@@ -126,8 +126,8 @@ export class BallTypeView extends Container {
                         duration: 0.2,
                         onUpdate: (x) => {
                             // console.log(this.circle.scale)
-                            let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
-                            let sizeMultiply = targetSize / this.rigidBody.circleRadius
+                            // let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
+                            // let sizeMultiply = targetSize / this.rigidBody.circleRadius
                             this.circle.scale = originImageScale * this.mergingTween.progress()
                             // Matter.Body.scale(this.rigidBody, sizeMultiply, sizeMultiply)
                         },
