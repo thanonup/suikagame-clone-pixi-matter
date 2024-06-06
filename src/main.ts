@@ -6,7 +6,7 @@ import Matter from 'matter-js'
 import { sound } from '@pixi/sound'
 
 const bootstrap = async () => {
-    const backgroundColor = '#fee2b0'
+    const backgroundColor = '#0C4214'
 
     const app = new Application()
 
@@ -38,7 +38,7 @@ const bootstrap = async () => {
     render.canvas.style.position = 'absolute'
     render.canvas.style.pointerEvents = 'none'
 
-    Render.run(render)
+    // Render.run(render)
 
     const runner = Runner.create()
     Runner.run(runner, engine)
@@ -94,6 +94,9 @@ async function preload() {
         start: 'assets/sprites/Start.png',
         gameOver: 'assets/sprites/GameOver.png',
         restart: 'assets/sprites/restart.png',
+        signwood: 'assets/sprites/signwood.png',
+        forestbackgorund: 'assets/sprites/forest-backgorund.png',
+        fade: 'assets/sprites/fade.png',
     })
 
     await Assets.addBundle('gameAssets', {

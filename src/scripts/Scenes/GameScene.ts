@@ -12,7 +12,7 @@ import * as PIXI from 'pixi.js'
 import { gsap } from 'gsap'
 import { PixiPlugin } from 'gsap/PixiPlugin'
 import { GameScoreView } from '../UI/GameScoreView'
-import { Assets } from 'pixi.js'
+import { Assets, Graphics, Sprite } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { GameOverView } from '../Components/GameOverView'
 import { sound } from '@pixi/sound'
@@ -31,6 +31,11 @@ export class GameScene extends PIXI.Container {
     private gameplayPod: GameplayPod
 
     private floorGraphic: PIXI.Graphics
+    private wallLeftSprite: PIXI.Sprite
+    private wallRightSprite: PIXI.Sprite
+    private gameBackgroundMask: PIXI.Graphics
+    private gameBackground: PIXI.Sprite
+
     private groundBody: Matter.Body
     private wallLeftBody: Matter.Body
     private wallRightBody: Matter.Body
@@ -73,12 +78,39 @@ export class GameScene extends PIXI.Container {
         await Assets.loadBundle('jungle_btn')
 
         this.sortableChildren = true
+
         this.gameController = new GameController()
         this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)
         this.gameController.pivot.set(this.gameController.width / 2, this.gameController.height / 2)
         this.gameController.position.set(this.app.screen.width / 2, this.app.screen.height / 2 - 20)
-
         this.gameController._zIndex = -1
+
+        this.createBackgroundGame()
+        this.createGroundAndBody()
+
+        this.gameScoreView = new GameScoreView()
+        this.gameScoreView.position.set(
+            this.app.screen.width / 2 - this.floorGraphic.width / 2,
+            this.app.screen.height / 2 - this.floorGraphic.width / 2 - 150
+        )
+        this.gameScoreView.doInit()
+
+        this.gameOverView = new GameOverView()
+        this.gameOverView.doInit(this.floorGraphic.width, 180)
+
+        this.SubscribeSetup()
+
+        this.resultView = new ResultView()
+        this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+
+        // this.gameOverBody.render.visible = false;
+
+        this.on('removed', () => {
+            this.onDestroy()
+        })
+    }
+
+    private createGroundAndBody() {
         this.floorGraphic = new PIXI.Graphics()
         this.floorGraphic
             .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH, 20)
@@ -89,14 +121,27 @@ export class GameScene extends PIXI.Container {
             this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
         )
 
-        this.addChild(this.floorGraphic)
+        this.wallLeftSprite = Sprite.from('fade')
+        this.wallLeftSprite.setSize(20, this.gameController.height + this.floorGraphic.height)
+        this.wallLeftSprite.anchor = 0.5
+        this.wallLeftSprite.angle = -180
 
-        this.gameScoreView = new GameScoreView()
-        this.gameScoreView.position.set(
-            this.app.screen.width / 2 - this.floorGraphic.width / 2,
-            this.app.screen.height / 2 - this.floorGraphic.width / 2 - 150
+        this.wallLeftSprite.position.set(
+            this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
         )
-        this.gameScoreView.doInit()
+
+        this.wallRightSprite = Sprite.from('fade')
+        this.wallRightSprite.setSize(20, this.gameController.height + this.floorGraphic.height)
+        this.wallRightSprite.anchor = 0.5
+        this.wallRightSprite.angle = -180
+
+        this.wallRightSprite.position.set(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
+        )
+
+        this.addChild(this.floorGraphic, this.wallLeftSprite, this.wallRightSprite)
 
         this.groundBody = Bodies.rectangle(
             this.floorGraphic.getBounds().x + this.floorGraphic.width / 2,
@@ -132,23 +177,29 @@ export class GameScene extends PIXI.Container {
         )
         this.scrollCellView = new ScrollCellView(this, this.gameController)
 
-        this.gameOverView = new GameOverView()
-        this.gameOverView.doInit(this.floorGraphic.width, 180)
-
-        this.SubscribeSetup()
-
-        this.resultView = new ResultView()
-        this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
-
-        // this.gameOverBody.render.visible = false;
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
         console.log('------All Bodies-------')
         console.log(Composite.allBodies(this.engine.world))
+    }
 
-        this.on('removed', () => {
-            this.onDestroy()
-        })
+    private createBackgroundGame() {
+        this.gameBackground = Sprite.from('forestbackgorund')
+        this.gameBackground.anchor = 0.5
+        this.gameBackground.position.set(this.app.screen.width / 2, this.app.screen.height / 2 + 20)
+        this.gameBackground.setSize(1280, 720)
+
+        this.gameBackgroundMask = new Graphics()
+        this.gameBackgroundMask
+            .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH + 40, GameScene.GAME_CONTROLLER_HEIGHT + 40)
+            .fill(0xff0000)
+        this.gameBackgroundMask.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+        this.gameBackgroundMask.pivot.set(this.gameBackgroundMask.width / 2, this.gameBackgroundMask.height / 2)
+
+        this.gameBackground.mask = this.gameBackgroundMask
+
+        this.addChild(this.gameBackgroundMask)
+        this.addChild(this.gameBackground)
     }
 
     private ballSpawnAndSetting() {
@@ -255,9 +306,22 @@ export class GameScene extends PIXI.Container {
         this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
         this.resultView.resize()
 
+        this.gameBackground.position.set(this.app.screen.width / 2, this.app.screen.height / 2 + 20)
+        this.gameBackgroundMask.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
+
         this.floorGraphic.position.set(
             this.gameController.x,
             this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
+        )
+
+        this.wallLeftSprite.position.set(
+            this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
+        )
+
+        this.wallRightSprite.position.set(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
         )
 
         Matter.Body.setPosition(this.groundBody, {
