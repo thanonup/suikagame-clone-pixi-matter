@@ -17,6 +17,9 @@ export class ScrollCellView extends PIXI.Container {
     private gameController: PIXI.Container
     private scrollContainer: PIXI.Container
 
+    private app: PIXI.Application
+    private dimBackground: PIXI.Graphics
+
     private tweening: gsap.core.Tween
 
     private isShow: boolean = false
@@ -27,21 +30,22 @@ export class ScrollCellView extends PIXI.Container {
         this.gameManager = GameManager.instance
         this.scene = scene
         this.gameController = gameController
+        this.app = this.gameManager.app
 
         const width = 250
-        this.scrollBox = this.createScrollBox(width)
+        this.createDim()
+        this.createScrollBox(width)
+        this.createScrollBg(width)
+        this.createScrollContainer()
+        this.createButton()
 
-        this.gameManager.gameplayPod.ballBeans.forEach((bean) => {
-            this.scrollBox.addItem(this.createCell(bean))
-        })
-
+        this.addChild(this.dimBackground, this.button, this.scrollContainer)
+        this.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
         GameObjectConstructor(this.scene, this)
+    }
 
+    private createScrollContainer() {
         this.scrollContainer = new PIXI.Container()
-
-        this.scrollBg = PIXI.Sprite.from('frame')
-        this.scrollBg.width = width
-        this.scrollBg.height = width * 1.5
 
         this.scrollContainer.addChild(this.scrollBg, this.scrollBox)
         this.scrollContainer.alpha = 0
@@ -49,29 +53,38 @@ export class ScrollCellView extends PIXI.Container {
             0 - this.scrollBg.width / 2,
             -this.gameController.height / 2 - this.scrollBg.height
         )
-
-        this.button = this.createButton()
-        this.button.position.set(this.gameController.width / 2 - 50, -this.gameController.height / 2 + 25)
-
-        this.addChild(this.button, this.scrollContainer)
-        this.position.set(this.gameManager.app.screen.width / 2, this.gameManager.app.screen.height / 2)
     }
 
-    private createScrollBox(width: number): ScrollBox {
+    private createScrollBg(width: number) {
+        this.scrollBg = PIXI.Sprite.from('frame')
+        this.scrollBg.width = width
+        this.scrollBg.height = width * 1.5
+    }
+
+    private createDim() {
+        this.dimBackground = new PIXI.Graphics()
+        this.dimBackground.rect(0, 0, this.app.screen.width, this.app.screen.height).fill(0x000000).alpha = 0.0001
+        this.dimBackground.pivot.set(this.dimBackground.width / 2, this.dimBackground.height / 2)
+    }
+
+    private createScrollBox(width: number) {
         const pad = 10
-        let scrollBox = new ScrollBox({
+        this.scrollBox = new ScrollBox({
             elementsMargin: 25,
             width: width - pad,
             height: width * 1.5 - 35,
             radius: 10,
             padding: 10,
         })
-        scrollBox.position.set(pad, pad)
-        return scrollBox
+        this.scrollBox.position.set(pad, pad)
+
+        this.gameManager.gameplayPod.ballBeans.forEach((bean) => {
+            this.scrollBox.addItem(this.createCell(bean))
+        })
     }
 
-    private createButton(): FancyButton {
-        let button = new FancyButton({
+    private createButton() {
+        this.button = new FancyButton({
             defaultView: `menu`,
             anchor: 0.5,
             animations: {
@@ -96,14 +109,14 @@ export class ScrollCellView extends PIXI.Container {
             },
         })
 
-        button.height = 50
-        button.width = 50
+        this.button.height = 50
+        this.button.width = 50
 
-        button.onPress.connect(() => {
+        this.button.onPress.connect(() => {
             this.onTicker()
         })
 
-        return button
+        this.button.position.set(this.gameController.width / 2 - 50, -this.gameController.height / 2 + 25)
     }
 
     private createCell(bean: BallBean) {
@@ -198,6 +211,8 @@ export class ScrollCellView extends PIXI.Container {
     }
 
     public onTicker() {
+        this.dimBackground.interactive = !this.isShow
+
         if (this.isShow) this.onHide()
         else this.onShow()
     }
