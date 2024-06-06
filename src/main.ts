@@ -56,11 +56,11 @@ const bootstrap = async () => {
         sound.play('musicBackground', { start: 2.5, volume: 0.25, loop: true })
     })
 
-    timer(2000).subscribe((_) => {
-        // FOR REMOVE SCENE
-        // app.ticker.remove(gameScene.update, gameScene)
-        // app.stage.removeChild(gameScene)
-    })
+    // timer(1000).subscribe((_) => {
+    //     // FOR REMOVE SCENE
+    //     app.ticker.remove(gameScene.update, gameScene)
+    //     app.stage.removeChild(gameScene)
+    // })
 
     function resize() {
         const windowWidth = window.innerWidth

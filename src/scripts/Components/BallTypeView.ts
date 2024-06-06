@@ -256,6 +256,7 @@ export class BallTypeView extends Container {
         this.beanSubscription?.unsubscribe()
         this.delaySubscription?.unsubscribe()
         this.gameoverTween?.kill()
+        Matter.Composite.remove(this.engine.world, this.rigidBody)
         this?.destroy()
     }
 

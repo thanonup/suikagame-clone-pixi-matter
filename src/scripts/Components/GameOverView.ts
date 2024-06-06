@@ -225,6 +225,9 @@ export class GameOverView extends Container {
         this.disposeGameOver?.unsubscribe()
         this.disposeGameOverAlert?.unsubscribe()
 
+        Matter.Composite.remove(this.gameManager.engine.world, this.gameOverAlertBody)
+        Matter.Composite.remove(this.gameManager.engine.world, this.gameOverLineBody)
+
         this.disposeGameOver = undefined
         this.disposeGameOverAlert = undefined
     }
