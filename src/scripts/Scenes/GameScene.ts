@@ -30,6 +30,8 @@ export class GameScene extends PIXI.Container {
     private gameplayPod: GameplayPod
 
     private floorGraphic: PIXI.Graphics
+    private wallLeftSprite: PIXI.Sprite
+    private wallRightSprite: PIXI.Sprite
     private gameBackgroundMask: PIXI.Graphics
     private gameBackground: PIXI.Sprite
 
@@ -116,7 +118,27 @@ export class GameScene extends PIXI.Container {
             this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
         )
 
-        this.addChild(this.floorGraphic)
+        this.wallLeftSprite = Sprite.from('fade')
+        this.wallLeftSprite.setSize(20, this.gameController.height + this.floorGraphic.height)
+        this.wallLeftSprite.anchor = 0.5
+        this.wallLeftSprite.angle = -180
+
+        this.wallLeftSprite.position.set(
+            this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
+        )
+
+        this.wallRightSprite = Sprite.from('fade')
+        this.wallRightSprite.setSize(20, this.gameController.height + this.floorGraphic.height)
+        this.wallRightSprite.anchor = 0.5
+        this.wallRightSprite.angle = -180
+
+        this.wallRightSprite.position.set(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
+        )
+
+        this.addChild(this.floorGraphic, this.wallLeftSprite, this.wallRightSprite)
 
         this.groundBody = Bodies.rectangle(
             this.floorGraphic.getBounds().x + this.floorGraphic.width / 2,
@@ -286,6 +308,16 @@ export class GameScene extends PIXI.Container {
         this.floorGraphic.position.set(
             this.gameController.x,
             this.gameController.y + this.gameController.height / 2 + this.floorGraphic.height / 2
+        )
+
+        this.wallLeftSprite.position.set(
+            this.floorGraphic.getBounds().x - this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
+        )
+
+        this.wallRightSprite.position.set(
+            this.floorGraphic.getBounds().x + this.floorGraphic.width + this.floorGraphic.height / 2,
+            this.app.screen.height / 2 - this.floorGraphic.height / 2
         )
 
         Matter.Body.setPosition(this.groundBody, {
