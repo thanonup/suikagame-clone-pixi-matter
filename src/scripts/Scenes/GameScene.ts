@@ -398,7 +398,8 @@ export class GameScene extends PIXI.Container {
                                 .subscribe((index) => {
                                     sound.play('destroy')
                                     this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
-                                    this.removeElement(elements[index])
+                                    elements[index].destroyOnGameOver()
+                                    // this.removeElement(elements[index])
                                     if (index === elements.length - 1)
                                         this.gameplayPod.setGameplayState(GameplayState.ResultState)
                                 })

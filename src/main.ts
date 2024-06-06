@@ -1,7 +1,6 @@
 import { GameScene } from './scripts/Scenes/GameScene'
 import { Application, Assets } from 'pixi.js'
 import { Engine, Render, Runner } from 'matter-js'
-import { timer } from 'rxjs'
 import Matter from 'matter-js'
 import { sound } from '@pixi/sound'
 
