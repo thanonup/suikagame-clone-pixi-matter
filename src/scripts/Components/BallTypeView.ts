@@ -1,5 +1,4 @@
-import { Container, ObservablePoint, Point, Sprite, Texture, Ticker } from 'pixi.js'
-import { GameplayPod } from '../Pods/GameplayPod'
+import { Container, Point, Sprite, Texture, Ticker } from 'pixi.js'
 import { Bodies, Composite } from 'matter-js'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
@@ -9,12 +8,10 @@ import { BallBean } from '../Beans/BallBean'
 import { Subscription, timer } from 'rxjs'
 import Matter from 'matter-js'
 import { gsap } from 'gsap'
-import { sound } from '@pixi/sound'
 import { mergeParticleView } from '../mergeParticleView'
 
 export class BallTypeView extends Container {
     private scene: Container
-    private gameplayPod: GameplayPod
     private engine: Matter.Engine
 
     private circle: Sprite
@@ -42,7 +39,6 @@ export class BallTypeView extends Container {
         this.gameManager = GameManager.instance
 
         this.scene = this.gameManager.currentScene
-        this.gameplayPod = this.gameManager.gameplayPod
         this.engine = this.gameManager.engine
 
         GameObjectConstructor(this.scene, this)
@@ -266,5 +262,13 @@ export class BallTypeView extends Container {
 
     inverseNormalize(normalizeVal: number, min: number, max: number): number {
         return +(normalizeVal * (max - min) + min).toFixed(2)
+    }
+
+    public destroyOnGameOver() {
+        this.gameManager.elements = this.gameManager.elements.filter((el: BallTypeView) => el != this)
+
+        this.mergeParticle.play()
+        this.circle.visible = false
+        timer(300).subscribe(() => this.onDestroy())
     }
 }

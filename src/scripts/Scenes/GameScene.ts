@@ -16,6 +16,7 @@ import { Assets, Graphics, Sprite } from 'pixi.js'
 import { BallTypePod } from '../Components/Pod/BallTypePod'
 import { GameOverView } from '../Components/GameOverView'
 import { sound } from '@pixi/sound'
+import { ScrollCellView } from '../UI/ScrollCellView'
 
 gsap.registerPlugin(PixiPlugin)
 PixiPlugin.registerPIXI(PIXI)
@@ -51,6 +52,7 @@ export class GameScene extends PIXI.Container {
     private resultView: ResultView
     private gameScoreView: GameScoreView
     private gameOverView: GameOverView
+    private scrollCellView: ScrollCellView
 
     constructor(app: PIXI.Application, engine: Matter.Engine) {
         super()
@@ -73,6 +75,7 @@ export class GameScene extends PIXI.Container {
         await Assets.loadBundle('gameAssets')
         await Assets.loadBundle('fontsLoad')
         await Assets.loadBundle('uiSprite')
+        await Assets.loadBundle('jungle_btn')
 
         this.sortableChildren = true
 
@@ -172,6 +175,7 @@ export class GameScene extends PIXI.Container {
                 isStatic: true,
             }
         )
+        this.scrollCellView = new ScrollCellView(this, this.gameController)
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
@@ -394,7 +398,8 @@ export class GameScene extends PIXI.Container {
                                 .subscribe((index) => {
                                     sound.play('destroy')
                                     this.gameManager.increaseScore(elements[index].getPod().currentBallBean.value.score)
-                                    this.removeElement(elements[index])
+                                    elements[index].destroyOnGameOver()
+                                    // this.removeElement(elements[index])
                                     if (index === elements.length - 1)
                                         this.gameplayPod.setGameplayState(GameplayState.ResultState)
                                 })

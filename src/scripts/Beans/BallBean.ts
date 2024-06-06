@@ -1,7 +1,7 @@
 import { BallType } from '../Types/BallType'
 
 export class BallBean {
-    public name: number
+    public name: string
     public ballType: BallType
     public size: number
     public score: number

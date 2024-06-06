@@ -1,7 +1,6 @@
 import { GameScene } from './scripts/Scenes/GameScene'
 import { Application, Assets } from 'pixi.js'
 import { Engine, Render, Runner } from 'matter-js'
-import { timer } from 'rxjs'
 import Matter from 'matter-js'
 import { sound } from '@pixi/sound'
 
@@ -112,6 +111,13 @@ async function preload() {
         tiger: '/assets/game-assets/tiger.png',
         turtle: '/assets/game-assets/turtle.png',
         wolf: '/assets/game-assets/wolf.png',
+    })
+
+    await Assets.addBundle('jungle_btn', {
+        about: 'public/assets/sprites/jungle/btn/about.png',
+        close: 'public/assets/sprites/jungle/btn/close.png',
+        menu: 'public/assets/sprites/jungle/btn/menu.png',
+        frame: 'public/assets/sprites/jungle/level_select/bg.png',
     })
 
     await Assets.addBundle('fontsLoad', {
