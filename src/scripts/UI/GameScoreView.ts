@@ -116,8 +116,10 @@ export class GameScoreView extends Container {
                     this.hightScore.text = `HighScore :  ${this.gameplayPod.highScoreBean.highScore}`
 
                     if (score == 0) {
+                        this.scoreText.position.set(40, 5)
                         this.hightScore.visible = false
                     } else {
+                        this.scoreText.position.set(40, -5)
                         this.hightScore.visible = true
                     }
                     this.outTween.seek(0.5, false)
