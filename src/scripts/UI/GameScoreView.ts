@@ -1,4 +1,15 @@
-import { Application, Container, FillGradient, Graphics, Point, Sprite, Text, TextStyle } from 'pixi.js'
+import {
+    Application,
+    Container,
+    FillGradient,
+    Graphics,
+    NineSlicePlane,
+    Point,
+    Sprite,
+    Text,
+    TextStyle,
+    Texture,
+} from 'pixi.js'
 import { GameManager } from '../Managers/GameManager'
 import { Subscription, interval, takeWhile } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
@@ -8,9 +19,11 @@ import { GameScene } from '../Scenes/GameScene'
 import { gsap } from 'gsap'
 
 export class GameScoreView extends Container {
+    public static readonly GAME_SCORE_WIDTH: number = 490
+
     private scene: Container
 
-    private signBackground: Sprite
+    private signBackground: NineSlicePlane
 
     private scoreText: Text
     private hightScore: Text
@@ -38,11 +51,13 @@ export class GameScoreView extends Container {
     }
 
     public doInit() {
-        this.signBackground = Sprite.from('signwood')
-        this.signBackground.anchor = 0.5
-        this.signBackground.setSize(185, 80)
-        this.signBackground.position.set(85, 25)
-        //this.signBackground.rect(0, 0, 120, 70).fill(0xff0000)
+        this.signBackground = new NineSlicePlane(Texture.from('signwood'), 175, 109, 142, 61)
+        this.signBackground.pivot.set(0, this.signBackground.height / 2)
+
+        this.signBackground.width = GameScoreView.GAME_SCORE_WIDTH
+        this.signBackground.height = 400
+        this.signBackground.scale = 0.2
+        this.signBackground.position.set(0, 25)
 
         this.scoreText = new Text(
             '0',
@@ -53,7 +68,7 @@ export class GameScoreView extends Container {
                 fill: '#3D3D3D',
             })
         )
-        this.scoreText.position.set(40, -5)
+        this.scoreText.position.set(43, -5)
         this.scoreText.anchor = 0
 
         this.hightScore = new Text(
@@ -65,7 +80,7 @@ export class GameScoreView extends Container {
                 fill: '#3D3D3D',
             })
         )
-        this.hightScore.position.set(35, this.scoreText.height / 2 + 10)
+        this.hightScore.position.set(38, this.scoreText.height / 2 + 10)
         this.hightScore.anchor = 0
 
         this.addChild(this.signBackground, this.scoreText, this.hightScore)
@@ -102,6 +117,12 @@ export class GameScoreView extends Container {
             this.tweeningScore = intervalTime.pipe(takeWhile(() => this.score < score)).subscribe(() => {
                 this.score++
                 this.scoreText.text = this.score
+
+                if (!this.hightScore.visible) {
+                    const currentWidth = +this.scoreText.width.toFixed(1)
+                    this.signBackground.width =
+                        GameScoreView.GAME_SCORE_WIDTH + currentWidth + 35 * this.scoreText.text.length
+                }
             })
         })
 
@@ -116,10 +137,16 @@ export class GameScoreView extends Container {
                     this.hightScore.text = `HighScore :  ${this.gameplayPod.highScoreBean.highScore}`
 
                     if (score == 0) {
-                        this.scoreText.position.set(40, 5)
+                        this.scoreText.position.set(43, 7)
+                        const currentWidth = +this.scoreText.width.toFixed(1)
+                        this.signBackground.width = GameScoreView.GAME_SCORE_WIDTH + currentWidth
                         this.hightScore.visible = false
                     } else {
-                        this.scoreText.position.set(40, -5)
+                        this.scoreText.position.set(43, -2)
+                        this.hightScore.position.set(38, this.scoreText.height / 2 + 12)
+
+                        this.signBackground.width = GameScoreView.GAME_SCORE_WIDTH + this.hightScore.width * 3.5
+                        this.signBackground.height = 425
                         this.hightScore.visible = true
                     }
                     this.outTween.seek(0.5, false)

@@ -95,7 +95,7 @@ export class BallTypeView extends Container {
                 }
             )
             this.rigidBody.density = bean.mass
-            console.log(bean.name + ' ' + this.rigidBody.density.toFixed(5))
+            // console.log(bean.name + ' ' + this.rigidBody.density.toFixed(5))
             Composite.add(this.engine.world, [this.rigidBody])
 
             if (oldBody != undefined) {

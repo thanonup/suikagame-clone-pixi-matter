@@ -38,7 +38,7 @@ const bootstrap = async () => {
     render.canvas.style.position = 'absolute'
     render.canvas.style.pointerEvents = 'none'
 
-    // Render.run(render)
+    Render.run(render)
 
     const runner = Runner.create()
     Runner.run(runner, engine)
