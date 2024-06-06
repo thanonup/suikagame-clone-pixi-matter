@@ -9,9 +9,13 @@ import { gsap } from 'gsap'
 export class ScrollCellView extends PIXI.Container {
     private scene: PIXI.Container
     private gameManager: GameManager
+
     private scrollBox: ScrollBox
+    private scrollBg: PIXI.Sprite
+
     private button: FancyButton
     private gameController: PIXI.Container
+    private scrollContainer: PIXI.Container
 
     private tweening: gsap.core.Tween
 
@@ -25,14 +29,7 @@ export class ScrollCellView extends PIXI.Container {
         this.gameController = gameController
 
         const width = 250
-        this.scrollBox = new ScrollBox({
-            background: '#ffffff',
-            elementsMargin: 25,
-            width: width,
-            height: width * 1.5,
-            radius: 10,
-            padding: 10,
-        })
+        this.scrollBox = this.createScrollBox(width)
 
         this.gameManager.gameplayPod.ballBeans.forEach((bean) => {
             this.scrollBox.addItem(this.createCell(bean))
@@ -40,17 +37,37 @@ export class ScrollCellView extends PIXI.Container {
 
         GameObjectConstructor(this.scene, this)
 
-        this.scrollBox.alpha = 0
-        this.scrollBox.position.set(
-            0 - this.scrollBox.width / 2,
-            -this.gameController.height / 2 - this.scrollBox.height
+        this.scrollContainer = new PIXI.Container()
+
+        this.scrollBg = PIXI.Sprite.from('frame')
+        this.scrollBg.width = width
+        this.scrollBg.height = width * 1.5
+
+        this.scrollContainer.addChild(this.scrollBg, this.scrollBox)
+        this.scrollContainer.alpha = 0
+        this.scrollContainer.position.set(
+            0 - this.scrollBg.width / 2,
+            -this.gameController.height / 2 - this.scrollBg.height
         )
 
         this.button = this.createButton()
         this.button.position.set(this.gameController.width / 2 - 50, -this.gameController.height / 2 + 25)
 
-        this.addChild(this.scrollBox, this.button)
+        this.addChild(this.button, this.scrollContainer)
         this.position.set(this.gameManager.app.screen.width / 2, this.gameManager.app.screen.height / 2)
+    }
+
+    private createScrollBox(width: number): ScrollBox {
+        const pad = 10
+        let scrollBox = new ScrollBox({
+            elementsMargin: 25,
+            width: width - pad,
+            height: width * 1.5 - 35,
+            radius: 10,
+            padding: 10,
+        })
+        scrollBox.position.set(pad, pad)
+        return scrollBox
     }
 
     private createButton(): FancyButton {
@@ -137,7 +154,7 @@ export class ScrollCellView extends PIXI.Container {
             globalStyles,
         })
 
-        layoutCell.width = 250
+        layoutCell.width = 225
         layoutCell.height = 50
 
         circle.height = layoutCell.height
@@ -151,10 +168,10 @@ export class ScrollCellView extends PIXI.Container {
         this.isShow = false
 
         if (this.tweening != undefined) this.tweening.kill()
-        this.tweening = gsap.to(this.scrollBox, {
+        this.tweening = gsap.to(this.scrollContainer, {
             pixi: {
-                y: -this.gameController.height / 2 - this.scrollBox.height,
-                x: 0 - this.scrollBox.width / 2,
+                y: -this.gameController.height / 2 - this.scrollBg.height,
+                x: 0 - this.scrollBg.width / 2,
                 alpha: 0,
             },
             duration,
@@ -168,10 +185,10 @@ export class ScrollCellView extends PIXI.Container {
         this.isShow = true
         if (this.tweening != undefined) this.tweening.kill()
 
-        this.tweening = gsap.to(this.scrollBox, {
+        this.tweening = gsap.to(this.scrollContainer, {
             pixi: {
-                y: 0 - this.scrollBox.height / 2,
-                x: 0 - this.scrollBox.width / 2,
+                y: 0 - this.scrollBg.height / 2,
+                x: 0 - this.scrollBg.width / 2,
                 alpha: 1,
             },
             duration,
