@@ -94,6 +94,8 @@ async function preload() {
         start: 'assets/sprites/Start.png',
         gameOver: 'assets/sprites/GameOver.png',
         restart: 'assets/sprites/restart.png',
+        signwood: 'assets/sprites/signwood.png',
+        forestbackgorund: 'assets/sprites/forest-backgorund.png',
     })
 
     await Assets.addBundle('gameAssets', {

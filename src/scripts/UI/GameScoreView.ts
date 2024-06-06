@@ -1,4 +1,4 @@
-import { Application, Container, FillGradient, Graphics, Point, Text, TextStyle } from 'pixi.js'
+import { Application, Container, FillGradient, Graphics, Point, Sprite, Text, TextStyle } from 'pixi.js'
 import { GameManager } from '../Managers/GameManager'
 import { Subscription, interval, takeWhile } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
@@ -10,7 +10,7 @@ import { gsap } from 'gsap'
 export class GameScoreView extends Container {
     private scene: Container
 
-    private mockPosition: Graphics
+    private signBackground: Sprite
 
     private scoreText: Text
     private hightScore: Text
@@ -38,8 +38,11 @@ export class GameScoreView extends Container {
     }
 
     public doInit() {
-        this.mockPosition = new Graphics()
-        this.mockPosition.rect(0, 0, 120, 70).fill(0xff0000)
+        this.signBackground = Sprite.from('signwood')
+        this.signBackground.anchor = 0.5
+        this.signBackground.setSize(185, 80)
+        this.signBackground.position.set(85, 25)
+        //this.signBackground.rect(0, 0, 120, 70).fill(0xff0000)
 
         this.scoreText = new Text(
             '0',
@@ -50,21 +53,22 @@ export class GameScoreView extends Container {
                 fill: '#3D3D3D',
             })
         )
+        this.scoreText.position.set(40, -5)
         this.scoreText.anchor = 0
 
         this.hightScore = new Text(
             'HighScore : xx',
             new TextStyle({
                 fontFamily: 'PoetsenOne-Regular',
-                fontSize: 14,
+                fontSize: 13,
                 stroke: { color: '#ffffff', width: 5, join: 'round' },
                 fill: '#3D3D3D',
             })
         )
-        this.hightScore.position.set(0, this.scoreText.height / 2 + 15)
+        this.hightScore.position.set(35, this.scoreText.height / 2 + 10)
         this.hightScore.anchor = 0
 
-        this.addChild(this.mockPosition, this.scoreText, this.hightScore)
+        this.addChild(this.signBackground, this.scoreText, this.hightScore)
 
         this.setupTween()
         this.setupSubScribe()
