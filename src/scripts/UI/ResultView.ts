@@ -1,4 +1,4 @@
-import { Application, Container, Assets, Graphics, Text } from 'pixi.js'
+import { Application, Container, Graphics, Text } from 'pixi.js'
 import { FancyButton } from '@pixi/ui'
 import { GameplayState } from '../Enum/GameplayState'
 import { GameManager } from '../Managers/GameManager'

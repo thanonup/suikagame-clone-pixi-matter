@@ -3,7 +3,7 @@ import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { BallStateType } from '../Types/BallStateType'
 import { GameplayState } from '../Enum/GameplayState'
-import { Observable, Subscription, observable, timer } from 'rxjs'
+import { Subscription, timer } from 'rxjs'
 import { sound } from '@pixi/sound'
 
 export class GameController extends Graphics {
@@ -30,7 +30,7 @@ export class GameController extends Graphics {
     }
 
     private setupSubscribe() {
-        this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
+        this.gameManager.gameplayPod.gameplayState.subscribe((_) => {
             this.movingTween?.kill()
         })
     }

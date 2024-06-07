@@ -22,7 +22,7 @@ export class mergeParticleView extends PIXI.Container {
     }
 
     private setupSubscribe() {
-        this.beanSubscription = this.pod.currentBallBean.subscribe((bean) => {
+        this.beanSubscription = this.pod.currentBallBean.subscribe((_) => {
             this.loadEmitter().then((emitter) => {
                 this.emitter = emitter
                 this.emitter.emit = false

@@ -1,21 +1,9 @@
-import {
-    Application,
-    Container,
-    FillGradient,
-    Graphics,
-    NineSlicePlane,
-    Point,
-    Sprite,
-    Text,
-    TextStyle,
-    Texture,
-} from 'pixi.js'
+import { Container, NineSlicePlane, Text, TextStyle, Texture } from 'pixi.js'
 import { GameManager } from '../Managers/GameManager'
 import { Subscription, interval, takeWhile } from 'rxjs'
 import { GameplayState } from '../Enum/GameplayState'
 import { GameplayPod } from '../Pods/GameplayPod'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
-import { GameScene } from '../Scenes/GameScene'
 import { gsap } from 'gsap'
 
 export class GameScoreView extends Container {
@@ -35,7 +23,6 @@ export class GameScoreView extends Container {
     private inTween: gsap.core.Tween
     private outTween: gsap.core.Tween
 
-    private app: Application
     private gameManager: GameManager
     private gameplayPod: GameplayPod
 
@@ -45,7 +32,6 @@ export class GameScoreView extends Container {
         this.gameManager = GameManager.instance
         this.scene = this.gameManager.currentScene
         this.gameplayPod = this.gameManager.gameplayPod
-        this.app = this.gameManager.app
 
         GameObjectConstructor(this.scene, this)
     }

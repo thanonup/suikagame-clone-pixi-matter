@@ -31,8 +31,6 @@ export class BallTypeView extends Container {
     private mergingTween: gsap.core.Tween
     private gameoverTween: gsap.core.Tween
 
-    private oldSize: number
-
     private mergeParticle: mergeParticleView
     constructor() {
         super()
@@ -75,7 +73,6 @@ export class BallTypeView extends Container {
             this.circle.setSize(bean.size * 2)
 
             const oldBody = this.rigidBody
-            if (oldBody) this.oldSize = oldBody.circleRadius
 
             this.rigidBody = undefined
             this.rigidBody = Bodies.polygon(
@@ -124,7 +121,7 @@ export class BallTypeView extends Container {
                     const originImageScale: number = this.circle.scale._x
                     this.mergingTween = gsap.to(this, {
                         duration: 0.2,
-                        onUpdate: (x) => {
+                        onUpdate: (_) => {
                             // console.log(this.circle.scale)
                             // let targetSize = this.pod.currentBallBean.value.size * this.mergingTween.progress()
                             // let sizeMultiply = targetSize / this.rigidBody.circleRadius

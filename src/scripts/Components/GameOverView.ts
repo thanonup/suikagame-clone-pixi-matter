@@ -10,7 +10,7 @@ import { GameplayState } from '../Enum/GameplayState'
 import { BallStateType } from '../Types/BallStateType'
 import { gsap } from 'gsap'
 import { BallTypeView } from './BallTypeView'
-import { IMediaInstance, sound } from '@pixi/sound'
+import { sound } from '@pixi/sound'
 
 export class GameOverView extends Container {
     private app: Application
@@ -36,8 +36,6 @@ export class GameOverView extends Container {
     private disposeGameOverAlert: Subscription
     private disposeState: Subscription
 
-    private soundWarning: IMediaInstance
-
     constructor() {
         super()
 
@@ -50,7 +48,6 @@ export class GameOverView extends Container {
 
         GameObjectConstructor(this.scene, this)
 
-        Matter.Events.on(this.engine, 'collisionStart', (event) => this.onCollisionEnter(event))
         Matter.Events.on(this.engine, 'collisionActive', (event) => this.onCollisionStay(event))
     }
 
@@ -123,8 +120,6 @@ export class GameOverView extends Container {
             )
         }
     }
-
-    private onCollisionEnter(event: Matter.IEventCollision<Matter.Engine>) {}
 
     private onCollisionStay(event: Matter.IEventCollision<Matter.Engine>) {
         if (this.isBallsIngameOverZone(event) && this.disposeGameOver == undefined) {
@@ -224,6 +219,7 @@ export class GameOverView extends Container {
     public onDestroy() {
         this.disposeGameOver?.unsubscribe()
         this.disposeGameOverAlert?.unsubscribe()
+        this.disposeState?.unsubscribe()
 
         Matter.Composite.remove(this.gameManager.engine.world, this.gameOverAlertBody)
         Matter.Composite.remove(this.gameManager.engine.world, this.gameOverLineBody)
