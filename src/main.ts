@@ -114,10 +114,10 @@ async function preload() {
     })
 
     await Assets.addBundle('jungle_btn', {
-        about: 'public/assets/sprites/jungle/btn/about.png',
-        close: 'public/assets/sprites/jungle/btn/close.png',
-        menu: 'public/assets/sprites/jungle/btn/menu.png',
-        frame: 'public/assets/sprites/jungle/level_select/bg.png',
+        about: '/assets/sprites/jungle/btn/about.png',
+        close: '/assets/sprites/jungle/btn/close.png',
+        menu: '/assets/sprites/jungle/btn/menu.png',
+        frame: '/assets/sprites/jungle/level_select/bg.png',
     })
 
     await Assets.addBundle('fontsLoad', {
@@ -139,7 +139,7 @@ async function preload() {
         merge: '/sounds/merge-sound.mp3',
         warning: '/sounds/warning-sound.mp3',
         gameover: '/sounds/gameover-sound.mp3',
-        win: 'sounds/winsound.mp3',
+        win: '/sounds/winsound.mp3',
     })
 }
 
