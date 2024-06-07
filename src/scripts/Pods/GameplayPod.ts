@@ -22,8 +22,10 @@ export class GameplayPod {
     }
 
     public async loadData() {
-        const data = await Assets.load<BallBean[]>('/assets/ball-data.json')
-        this.ballBeans = data
+        await Assets.load('ball-data').then((data) => {
+            console.log(data)
+            this.ballBeans = data
+        })
 
         console.log('------Data Ball-------')
         console.log(this.ballBeans)

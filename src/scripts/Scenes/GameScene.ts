@@ -71,13 +71,13 @@ export class GameScene extends PIXI.Container {
     }
 
     public async doInit() {
+        this.sortableChildren = true
+
         await this.gameplayPod.loadData()
         await Assets.loadBundle('gameAssets')
         await Assets.loadBundle('fontsLoad')
         await Assets.loadBundle('uiSprite')
         await Assets.loadBundle('jungle_btn')
-
-        this.sortableChildren = true
 
         this.gameController = new GameController()
         this.gameController.doInit(GameScene.GAME_CONTROLLER_WIDTH, GameScene.GAME_CONTROLLER_HEIGHT)

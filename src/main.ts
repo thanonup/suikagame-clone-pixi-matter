@@ -8,6 +8,7 @@ const bootstrap = async () => {
     const backgroundColor = '#0C4214'
 
     const app = new Application()
+    //globalThis.__PIXI_APP__ = app
 
     await app.init({
         width: window.innerWidth,
@@ -89,6 +90,8 @@ async function preload() {
 
     await Assets.add({ alias: 'particle', src: 'assets/sprites/particle.png' })
 
+    await Assets.add({ alias: 'ball-data', src: 'assets/ball-data.json' })
+
     await Assets.addBundle('uiSprite', {
         start: 'assets/sprites/Start.png',
         gameOver: 'assets/sprites/GameOver.png',
@@ -99,47 +102,47 @@ async function preload() {
     })
 
     await Assets.addBundle('gameAssets', {
-        chick: '/assets/game-assets/chick.png',
-        cow: '/assets/game-assets/cow.png',
-        deer: '/assets/game-assets/deer.png',
-        dragon: '/assets/game-assets/dragon.png',
-        goat: '/assets/game-assets/goat.png',
-        monkey: '/assets/game-assets/monkey.png',
-        pig: '/assets/game-assets/pig.png',
-        rabbit: '/assets/game-assets/rabbit.png',
-        rat: '/assets/game-assets/rat.png',
-        tiger: '/assets/game-assets/tiger.png',
-        turtle: '/assets/game-assets/turtle.png',
-        wolf: '/assets/game-assets/wolf.png',
+        chick: 'assets/game-assets/chick.png',
+        cow: 'assets/game-assets/cow.png',
+        deer: 'assets/game-assets/deer.png',
+        dragon: 'assets/game-assets/dragon.png',
+        goat: 'assets/game-assets/goat.png',
+        monkey: 'assets/game-assets/monkey.png',
+        pig: 'assets/game-assets/pig.png',
+        rabbit: 'assets/game-assets/rabbit.png',
+        rat: 'assets/game-assets/rat.png',
+        tiger: 'assets/game-assets/tiger.png',
+        turtle: 'assets/game-assets/turtle.png',
+        wolf: 'assets/game-assets/wolf.png',
     })
 
     await Assets.addBundle('jungle_btn', {
-        about: '/assets/sprites/jungle/btn/about.png',
-        close: '/assets/sprites/jungle/btn/close.png',
-        menu: '/assets/sprites/jungle/btn/menu.png',
-        frame: '/assets/sprites/jungle/level_select/bg.png',
+        about: 'assets/sprites/jungle/btn/about.png',
+        close: 'assets/sprites/jungle/btn/close.png',
+        menu: 'assets/sprites/jungle/btn/menu.png',
+        frame: 'assets/sprites/jungle/level_select/bg.png',
     })
 
     await Assets.addBundle('fontsLoad', {
         sakuraBlossom: {
-            src: '/fonts/sakura-blossom.ttf',
+            src: 'fonts/sakura-blossom.ttf',
             data: { family: 'sakura-blossom' },
         },
         poetsenOneRegular: {
-            src: '/fonts/PoetsenOne-Regular.ttf',
+            src: 'fonts/PoetsenOne-Regular.ttf',
             data: { family: 'PoetsenOne-Regular' },
         },
     })
 
     sound.add({
-        musicBackground: '/sounds/pudding-bgm.mp3',
-        destroy: '/sounds/destroy-sound.mp3',
-        drop1: '/sounds/drop-sound.mp3',
-        drop2: '/sounds/drop2-sound.mp3',
-        merge: '/sounds/merge-sound.mp3',
-        warning: '/sounds/warning-sound.mp3',
-        gameover: '/sounds/gameover-sound.mp3',
-        win: '/sounds/winsound.mp3',
+        musicBackground: 'sounds/pudding-bgm.mp3',
+        destroy: 'sounds/destroy-sound.mp3',
+        drop1: 'sounds/drop-sound.mp3',
+        drop2: 'sounds/drop2-sound.mp3',
+        merge: 'sounds/merge-sound.mp3',
+        warning: 'sounds/warning-sound.mp3',
+        gameover: 'sounds/gameover-sound.mp3',
+        win: 'sounds/winsound.mp3',
     })
 }
 
