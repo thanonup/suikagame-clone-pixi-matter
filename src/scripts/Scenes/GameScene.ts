@@ -175,7 +175,7 @@ export class GameScene extends PIXI.Container {
                 isStatic: true,
             }
         )
-        this.scrollCellView = new ScrollCellView(this, this.gameController)
+        this.scrollCellView = new ScrollCellView(this)
         this.scrollCellView.zIndex = 100
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
@@ -305,6 +305,7 @@ export class GameScene extends PIXI.Container {
 
         this.gameController.resize()
         this.gameOverView.resize()
+        this.scrollCellView.resize()
 
         this.resultView.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
         this.resultView.resize()

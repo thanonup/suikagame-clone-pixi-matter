@@ -36,7 +36,7 @@ export class GameController extends Graphics {
     }
 
     public doInit(width: number, height: number) {
-        this.rect(0, 0, width, height).fill(0x252525).alpha = 0.0001
+        this.rect(0, 0, width, height).fill(0x252525).alpha = 0.5
 
         this.eventMode = 'static'
         this.cursor = 'pointer'

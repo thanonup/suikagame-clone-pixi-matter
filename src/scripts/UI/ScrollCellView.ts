@@ -5,6 +5,7 @@ import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
 import { GameManager } from '../Managers/GameManager'
 import { FancyButton, ScrollBox } from '@pixi/ui'
 import { gsap } from 'gsap'
+import { GameScene } from '../Scenes/GameScene'
 
 export class ScrollCellView extends PIXI.Container {
     private scene: PIXI.Container
@@ -14,7 +15,6 @@ export class ScrollCellView extends PIXI.Container {
     private scrollBg: PIXI.Sprite
 
     private button: FancyButton
-    private gameController: PIXI.Container
     private scrollContainer: PIXI.Container
 
     private app: PIXI.Application
@@ -24,12 +24,11 @@ export class ScrollCellView extends PIXI.Container {
 
     private isShow: boolean = false
 
-    constructor(scene: PIXI.Container, gameController: PIXI.Container) {
+    constructor(scene: PIXI.Container) {
         super()
 
         this.gameManager = GameManager.instance
         this.scene = scene
-        this.gameController = gameController
         this.app = this.gameManager.app
 
         const width = 250
@@ -51,7 +50,7 @@ export class ScrollCellView extends PIXI.Container {
         this.scrollContainer.alpha = 0
         this.scrollContainer.position.set(
             0 - this.scrollBg.width / 2,
-            -this.gameController.height / 2 - this.scrollBg.height
+            -GameScene.GAME_CONTROLLER_HEIGHT / 2 - this.scrollBg.height
         )
     }
 
@@ -63,7 +62,9 @@ export class ScrollCellView extends PIXI.Container {
 
     private createDim() {
         this.dimBackground = new PIXI.Graphics()
-        this.dimBackground.rect(0, 0, this.app.screen.width, this.app.screen.height).fill(0x000000).alpha = 0.2
+        this.dimBackground
+            .rect(0, 0, GameScene.GAME_CONTROLLER_WIDTH + 40, GameScene.GAME_CONTROLLER_HEIGHT + 40)
+            .fill(0x000000).alpha = 0.2
         this.dimBackground.pivot.set(this.dimBackground.width / 2, this.dimBackground.height / 2)
         this.dimBackground.interactive = true
         this.dimBackground.visible = false
@@ -118,7 +119,7 @@ export class ScrollCellView extends PIXI.Container {
             this.onTicker()
         })
 
-        this.button.position.set(this.gameController.width / 2 - 50, -this.gameController.height / 2 + 25)
+        this.button.position.set(GameScene.GAME_CONTROLLER_WIDTH / 2 - 50, -GameScene.GAME_CONTROLLER_HEIGHT / 2 + 25)
     }
 
     private createCell(bean: BallBean) {
@@ -186,7 +187,7 @@ export class ScrollCellView extends PIXI.Container {
         if (this.tweening != undefined) this.tweening.kill()
         this.tweening = gsap.to(this.scrollContainer, {
             pixi: {
-                y: -this.gameController.height / 2 - this.scrollBg.height,
+                y: -GameScene.GAME_CONTROLLER_HEIGHT / 2 - this.scrollBg.height,
                 x: 0 - this.scrollBg.width / 2,
                 alpha: 0,
             },
@@ -217,5 +218,9 @@ export class ScrollCellView extends PIXI.Container {
     public onTicker() {
         if (this.isShow) this.onHide()
         else this.onShow()
+    }
+
+    public resize() {
+        this.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
     }
 }
