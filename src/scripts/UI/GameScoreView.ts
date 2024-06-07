@@ -93,6 +93,7 @@ export class GameScoreView extends Container {
         this.inTween = gsap.to(this, {
             x: this.x,
             y: this.y,
+            alpha: 1,
             duration: 0.5,
             ease: 'back.out',
         })
@@ -101,7 +102,8 @@ export class GameScoreView extends Container {
 
         this.outTween = gsap.to(this, {
             x: this.x,
-            y: -100,
+            y: this.y - 100,
+            alpha: 0,
             duration: 0.5,
             ease: 'back.in',
         })
@@ -167,6 +169,7 @@ export class GameScoreView extends Container {
     }
 
     public onResize() {
+        this.setupTween()
         switch (this.gameManager.gameplayPod.gameplayState.value) {
             case GameplayState.GameplayState:
                 if (this.inTween.progress() > 0) {

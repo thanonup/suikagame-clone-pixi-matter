@@ -6,6 +6,7 @@ import { GameManager } from '../Managers/GameManager'
 import { FancyButton, ScrollBox } from '@pixi/ui'
 import { gsap } from 'gsap'
 import { GameScene } from '../Scenes/GameScene'
+import { GameplayState } from '../Enum/GameplayState'
 
 export class ScrollCellView extends PIXI.Container {
     private scene: PIXI.Container
@@ -21,6 +22,8 @@ export class ScrollCellView extends PIXI.Container {
     private dimBackground: PIXI.Graphics
 
     private tweening: gsap.core.Tween
+    private inTween: gsap.core.Tween
+    private outTween: gsap.core.Tween
 
     private isShow: boolean = false
 
@@ -37,10 +40,25 @@ export class ScrollCellView extends PIXI.Container {
         this.createScrollBg(width)
         this.createScrollContainer()
         this.createButton()
+        this.setupTween()
 
         this.addChild(this.dimBackground, this.button, this.scrollContainer)
         this.position.set(this.app.screen.width / 2, this.app.screen.height / 2)
         GameObjectConstructor(this.scene, this)
+
+        this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
+            switch (state) {
+                case GameplayState.GameplayState:
+                    this.outTween.seek(0.5, false)
+                    this.inTween.restart()
+
+                    break
+                case GameplayState.ResultState:
+                    this.onHide()
+                    this.outTween.restart()
+                    break
+            }
+        })
     }
 
     private createScrollContainer() {
@@ -179,6 +197,27 @@ export class ScrollCellView extends PIXI.Container {
         return layoutCell
     }
 
+    private setupTween() {
+        this.inTween = gsap.to(this.button, {
+            x: this.button.x,
+            y: this.button.y,
+            alpha: 1,
+            duration: 0.5,
+            ease: 'back.out',
+        })
+
+        this.inTween.pause()
+
+        this.outTween = gsap.to(this.button, {
+            x: this.button.x,
+            y: -GameScene.GAME_CONTROLLER_HEIGHT / 2 - 100,
+            alpha: 0,
+            duration: 0.5,
+            ease: 'back.in',
+        })
+        this.outTween.pause()
+    }
+
     private onHide() {
         this.dimBackground.visible = false
         const duration = 0.5
@@ -199,6 +238,7 @@ export class ScrollCellView extends PIXI.Container {
 
     private onShow() {
         this.dimBackground.visible = true
+
         const duration = 0.5
         this.isShow = true
         if (this.tweening != undefined) this.tweening.kill()
