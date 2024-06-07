@@ -13,6 +13,7 @@ export class GameplayPod {
         GameplayState.GameplayState
     )
     public highScoreBean: ScoreSaveBean
+    public oldHighScore: number
 
     private localStorageService: LocalStorageService
 
@@ -41,8 +42,10 @@ export class GameplayPod {
     }
 
     public saveHightScore(score: number) {
-        this.highScoreBean.highScore = score
-
-        this.localStorageService.saveSettingData()
+        if (score > this.highScoreBean.highScore) {
+            this.oldHighScore = this.highScoreBean.highScore
+            this.highScoreBean.highScore = score
+            this.localStorageService.saveSettingData()
+        }
     }
 }

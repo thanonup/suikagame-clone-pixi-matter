@@ -4,6 +4,7 @@ import { GameplayState } from '../Enum/GameplayState'
 import { GameManager } from '../Managers/GameManager'
 import { gsap } from 'gsap'
 import { GameObjectConstructor } from '../Plugins/GameObjectConstructor'
+import { sound } from '@pixi/sound'
 
 export class ResultView extends Container {
     private scene: Container
@@ -15,7 +16,10 @@ export class ResultView extends Container {
     private gameOverText: Text
     private headerText: Text
     private scoreText: Text
+    private brakingScoreText: Text
     private restartButton: FancyButton
+
+    private loopHighScoreTween: gsap.core.Tween
 
     constructor() {
         super()
@@ -70,6 +74,18 @@ export class ResultView extends Container {
         this.scoreText.position.set(0, 0)
         this.scoreText.anchor.set(0.5, 1)
 
+        this.brakingScoreText = new Text('*New \n HighScore!*', {
+            fill: '#000000',
+            fontFamily: 'PoetsenOne-Regular',
+            fontSize: 20,
+            align: 'center',
+            stroke: { color: '#FFD02C', width: 5, join: 'round' },
+        })
+
+        this.brakingScoreText.position.set(-80, -100)
+        this.brakingScoreText.anchor.set(0.5, 1)
+        this.brakingScoreText.angle = -30
+
         this.restartButton = new FancyButton({
             defaultView: `restart`,
             anchor: 0.5,
@@ -100,11 +116,16 @@ export class ResultView extends Container {
         this.restartButton.position.set(0, 30)
 
         this.restartButton.onPress.connect(() => {
-            console.log('restart')
             GameManager.instance.gameplayPod.setGameplayState(GameplayState.GameplayState)
         })
 
-        this.objectGroup.addChild(this.gameOverText, this.headerText, this.scoreText, this.restartButton)
+        this.objectGroup.addChild(
+            this.gameOverText,
+            this.headerText,
+            this.scoreText,
+            this.restartButton,
+            this.brakingScoreText
+        )
 
         this.addChild(this.dimBackground, this.objectGroup)
     }
@@ -113,10 +134,13 @@ export class ResultView extends Container {
         this.gameManager.gameplayPod.gameplayState.subscribe((state) => {
             switch (state) {
                 case GameplayState.GameplayState:
+                    sound.stop('win')
                     this.onClose()
                     break
                 case GameplayState.ResultState:
+                    this.loopHighScoreTween?.kill()
                     this.visible = true
+                    this.brakingScoreText.visible = false
                     this.onOpen()
                     break
             }
@@ -130,6 +154,39 @@ export class ResultView extends Container {
                 scale: 1,
             },
             duration: 0.3,
+            onComplete: () => {
+                this.brakingScoreText.scale = 0
+                this.brakingScoreText.visible = this.gameManager.score.value > this.gameManager.gameplayPod.oldHighScore
+                if (this.brakingScoreText.visible) {
+                    sound.play('win')
+                    gsap.to(this.brakingScoreText, {
+                        pixi: {
+                            scale: 1,
+                        },
+                        duration: 0.3,
+                        onComplete: () => {
+                            this.loopHighScoreTween = gsap.fromTo(
+                                this.brakingScoreText,
+                                {
+                                    pixi: {
+                                        scale: 1,
+                                    },
+                                },
+                                {
+                                    pixi: {
+                                        scale: 0.5,
+                                    },
+                                    ease: 'expo.inOut',
+                                    duration: 1,
+                                    yoyo: true,
+                                    repeat: -1,
+                                    repeatDelay: 0.2,
+                                }
+                            )
+                        },
+                    })
+                }
+            },
         })
         gsap.fromTo(
             this.objectGroup,
@@ -151,6 +208,7 @@ export class ResultView extends Container {
     }
 
     private onClose() {
+        this.loopHighScoreTween?.kill()
         gsap.to(this.objectGroup, {
             pixi: {
                 scale: 0,

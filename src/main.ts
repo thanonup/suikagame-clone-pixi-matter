@@ -139,6 +139,7 @@ async function preload() {
         merge: '/sounds/merge-sound.mp3',
         warning: '/sounds/warning-sound.mp3',
         gameover: '/sounds/gameover-sound.mp3',
+        win: 'sounds/winsound.mp3',
     })
 }
 
