@@ -202,7 +202,7 @@ export class GameOverView extends Container {
         return isBallsInZone
     }
     private getGameOverPosition(): number {
-        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 500
+        return this.app.screen.height / 2 - GameScene.GAME_CONTROLLER_HEIGHT / 2 + 70
     }
 
     public resize() {
