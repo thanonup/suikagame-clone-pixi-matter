@@ -63,8 +63,10 @@ export class ScrollCellView extends PIXI.Container {
 
     private createDim() {
         this.dimBackground = new PIXI.Graphics()
-        this.dimBackground.rect(0, 0, this.app.screen.width, this.app.screen.height).fill(0x000000).alpha = 0.0001
+        this.dimBackground.rect(0, 0, this.app.screen.width, this.app.screen.height).fill(0x000000).alpha = 0.2
         this.dimBackground.pivot.set(this.dimBackground.width / 2, this.dimBackground.height / 2)
+        this.dimBackground.interactive = true
+        this.dimBackground.visible = false
     }
 
     private createScrollBox(width: number) {
@@ -177,6 +179,7 @@ export class ScrollCellView extends PIXI.Container {
     }
 
     private onHide() {
+        this.dimBackground.visible = false
         const duration = 0.5
         this.isShow = false
 
@@ -194,6 +197,7 @@ export class ScrollCellView extends PIXI.Container {
     }
 
     private onShow() {
+        this.dimBackground.visible = true
         const duration = 0.5
         this.isShow = true
         if (this.tweening != undefined) this.tweening.kill()
@@ -211,8 +215,6 @@ export class ScrollCellView extends PIXI.Container {
     }
 
     public onTicker() {
-        this.dimBackground.interactive = !this.isShow
-
         if (this.isShow) this.onHide()
         else this.onShow()
     }

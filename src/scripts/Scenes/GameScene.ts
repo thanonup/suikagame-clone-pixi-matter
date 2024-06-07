@@ -176,6 +176,7 @@ export class GameScene extends PIXI.Container {
             }
         )
         this.scrollCellView = new ScrollCellView(this, this.gameController)
+        this.scrollCellView.zIndex = 100
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
@@ -188,6 +189,8 @@ export class GameScene extends PIXI.Container {
         this.gameBackground.anchor = 0.5
         this.gameBackground.position.set(this.app.screen.width / 2, this.app.screen.height / 2 + 20)
         this.gameBackground.setSize(1280, 720)
+        this.gameBackground.tint = 'C4C4C4'
+        this.gameBackground.blendMode = 'darken'
 
         this.gameBackgroundMask = new Graphics()
         this.gameBackgroundMask
