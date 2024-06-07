@@ -1,0 +1,233 @@
+[
+    {
+        "name": "turtle",
+        "ballType": "Turtle",
+        "score": 10,
+        "size": 20,
+        "colorCode": "#FF69B4",
+        "mass": 1,
+        "assetKey": "turtle",
+        "color": [
+            {
+                "time": 0,
+                "value": "e3ffe9"
+            },
+            {
+                "time": 1,
+                "value": "3bff45"
+            }
+        ]
+    },
+    {
+        "name": "rabbit",
+        "ballType": "Rabbit",
+        "score": 15,
+        "size": 25,
+        "colorCode": "#CD5C5C",
+        "mass": 4,
+        "assetKey": "rabbit",
+        "color": [
+            {
+                "time": 0,
+                "value": "fff2e0"
+            },
+            {
+                "time": 1,
+                "value": "ffa938"
+            }
+        ]
+    },
+    {
+        "name": "wolf",
+        "ballType": "Wolf",
+        "score": 20,
+        "size": 30,
+        "colorCode": "#BA55D3",
+        "mass": 8,
+        "assetKey": "wolf",
+        "color": [
+            {
+                "time": 0,
+                "value": "fff2e0"
+            },
+            {
+                "time": 1,
+                "value": "ff7300"
+            }
+        ]
+    },
+    {
+        "name": "pig",
+        "ballType": "Pig",
+        "score": 25,
+        "size": 35,
+        "colorCode": "#FFA07A",
+        "mass": 12,
+        "assetKey": "pig",
+        "color": [
+            {
+                "time": 0,
+                "value": "ffffff"
+            },
+            {
+                "time": 1,
+                "value": "fa55fa"
+            }
+        ]
+    },
+    {
+        "name": "goat",
+        "ballType": "Goat",
+        "score": 30,
+        "size": 45,
+        "colorCode": "#FF4500",
+        "mass": 16,
+        "assetKey": "goat",
+        "color": [
+            {
+                "time": 0,
+                "value": "ffffff"
+            },
+            {
+                "time": 1,
+                "value": "d19e64"
+            }
+        ]
+    },
+    {
+        "name": "cow",
+        "ballType": "Cow",
+        "score": 35,
+        "size": 50,
+        "colorCode": "#FFD700",
+        "mass": 24,
+        "assetKey": "cow",
+        "color": [
+            {
+                "time": 0,
+                "value": "f7f7f7"
+            },
+            {
+                "time": 1,
+                "value": "444444"
+            }
+        ]
+    },
+    {
+        "name": "monkey",
+        "ballType": "Monkey",
+        "score": 40,
+        "size": 65,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "monkey",
+        "color": [
+            {
+                "time": 0,
+                "value": "ebc7a7"
+            },
+            {
+                "time": 1,
+                "value": "d96500"
+            }
+        ]
+    },
+    {
+        "name": "deer",
+        "ballType": "Deer",
+        "score": 40,
+        "size": 70,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "deer",
+        "color": [
+            {
+                "time": 0,
+                "value": "ffddbd"
+            },
+            {
+                "time": 1,
+                "value": "ff9100"
+            }
+        ]
+    },
+
+    {
+        "name": "rat",
+        "ballType": "Rat",
+        "score": 40,
+        "size": 80,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "rat",
+        "color": [
+            {
+                "time": 0,
+                "value": "f0f0f0"
+            },
+            {
+                "time": 1,
+                "value": "877b69"
+            }
+        ]
+    },
+
+    {
+        "name": "tiger",
+        "ballType": "Tiger",
+        "score": 40,
+        "size": 85,
+        "colorCode": "#32CD32",
+        "mass": 32,
+        "assetKey": "tiger",
+        "color": [
+            {
+                "time": 0,
+                "value": "ffddbd"
+            },
+            {
+                "time": 1,
+                "value": "ff9100"
+            }
+        ]
+    },
+
+    {
+        "name": "dragon",
+        "ballType": "Dragon",
+        "score": 40,
+        "size": 90,
+        "colorCode": "#006400",
+        "mass": 40,
+        "assetKey": "dragon",
+        "color": [
+            {
+                "time": 0,
+                "value": "e3ffe9"
+            },
+            {
+                "time": 1,
+                "value": "3bff45"
+            }
+        ]
+    },
+    {
+        "name": "chick",
+        "ballType": "Chick",
+        "score": 40,
+        "size": 110,
+        "colorCode": "#006400",
+        "mass": 40,
+        "assetKey": "chick",
+        "color": [
+            {
+                "time": 0,
+                "value": "ffffff"
+            },
+            {
+                "time": 1,
+                "value": "ffcc00"
+            }
+        ]
+    }
+]
