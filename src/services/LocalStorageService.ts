@@ -11,12 +11,12 @@ export class LocalStorageService {
             this.highScoreBean = JSON.parse(data)
         }
 
-        console.log(this.highScoreBean)
+        // console.log(this.highScoreBean)
         return this.highScoreBean
     }
 
     public saveSettingData(): void {
-        console.log(this.highScoreBean)
+        //  console.log(this.highScoreBean)
         localStorage.setItem('scoreData', JSON.stringify(this.highScoreBean))
     }
 }
