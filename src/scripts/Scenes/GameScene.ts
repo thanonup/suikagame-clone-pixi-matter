@@ -180,8 +180,8 @@ export class GameScene extends PIXI.Container {
 
         Composite.add(this.engine.world, [this.groundBody, this.wallLeftBody, this.wallRightBody])
 
-        console.log('------All Bodies-------')
-        console.log(Composite.allBodies(this.engine.world))
+        // console.log('------All Bodies-------')
+        // console.log(Composite.allBodies(this.engine.world))
     }
 
     private createBackgroundGame() {
