@@ -1,5 +1,5 @@
 
-Hosting Game On GitHub
+Hosting Game On Firebase
 Link game : https://suikagame-clone-pixi-matter.web.app
 
 [Game Preview]
