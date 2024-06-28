@@ -361,7 +361,7 @@ export class GameScene extends PIXI.Container {
             if (x.getPod().ballStateType.value != BallStateType.Static) {
                 x.freezeBall(true)
                 const newPos = this.getNewPositionResize(x.getBody().position.x, x.getBody().position.y, x.width)
-                console.log(newPos)
+                //console.log(newPos)
                 Matter.Body.setPosition(x.getBody(), {
                     x: newPos.x,
                     y: newPos.y,
