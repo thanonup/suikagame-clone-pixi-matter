@@ -1,9 +1,9 @@
 
 Hosting Game On Github page and Firebase
 
-!Link game firebase : https://suikagame-clone-pixi-matter.web.app
+Link game firebase : https://suikagame-clone-pixi-matter.web.app
 
-!Link game github : https://thanonup.github.io/suikagame-clone-pixi-matter/
+Link game github : https://thanonup.github.io/suikagame-clone-pixi-matter/
 
 [Game Preview]
 - Gameplay
